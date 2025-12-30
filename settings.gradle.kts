@@ -21,4 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Observability SDK"
 include(":app")
- 
+include(":observability-sdk:build-logic")
+include(":observability-sdk:presentation")
+include(":observability-sdk:domain")
+include(":observability-sdk:data")
