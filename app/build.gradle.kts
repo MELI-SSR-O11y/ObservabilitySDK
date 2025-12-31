@@ -39,6 +39,9 @@ android {
 }
 
 dependencies {
+  implementation(files("libs/presentation-debug.aar"))
+  implementation(files("libs/domain-debug.aar"))
+  implementation(files("libs/data-debug.aar"))
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)

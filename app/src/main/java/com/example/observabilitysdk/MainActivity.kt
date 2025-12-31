@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.observabilitysdk.ui.theme.ObservabilitySDKTheme
+import com.example.presentation.SumaTwoTest
 
 class MainActivity: ComponentActivity() {
   override fun onCreate(savedInstanceState : Bundle?) {
@@ -32,7 +33,7 @@ class MainActivity: ComponentActivity() {
 @Composable
 fun Greeting(name : String, modifier : Modifier = Modifier) {
   Text(
-    text = "Hello $name!", modifier = modifier
+    text = "Hello $name! -> " + SumaTwoTest().twoNumbers(1,2), modifier = modifier
   )
 }
 
