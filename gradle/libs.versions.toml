@@ -10,6 +10,7 @@ activityCompose = "1.12.2"
 composeBom = "2024.09.00"
 appcompat = "1.7.1"
 material = "1.13.0"
+kermit = "2.0.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,6 +32,9 @@ material = { group = "com.google.android.material", name = "material", version.r
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+
+# Logger
+touchlab-kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 
 
 [plugins]
