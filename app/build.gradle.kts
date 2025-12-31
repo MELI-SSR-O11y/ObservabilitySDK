@@ -39,9 +39,12 @@ android {
 }
 
 dependencies {
-  implementation(files("libs/presentation-debug.aar"))
-  implementation(files("libs/domain-debug.aar"))
-  implementation(files("libs/data-debug.aar"))
+//  implementation(files("libs/presentation-debug.aar"))
+//  implementation(files("libs/domain-debug.aar"))
+//  implementation(files("libs/data-debug.aar"))
+  implementation(project(":observability-sdk:presentation"))
+  implementation(project(":observability-sdk:domain"))
+  implementation(project(":observability-sdk:data"))
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
