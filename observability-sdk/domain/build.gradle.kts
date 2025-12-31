@@ -1,5 +1,6 @@
 plugins {
   id("observability.android.library")
+  alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -7,5 +8,4 @@ android {
 }
 
 dependencies {
-
 }

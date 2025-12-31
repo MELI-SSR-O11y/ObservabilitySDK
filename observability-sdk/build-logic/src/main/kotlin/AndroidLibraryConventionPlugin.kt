@@ -36,7 +36,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 }
             }
 
-            extensions.getByType<KotlinAndroidProjectExtension>().apply {
+            extensions.configure<KotlinAndroidProjectExtension> {
                 compilerOptions {
                     jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
                 }
