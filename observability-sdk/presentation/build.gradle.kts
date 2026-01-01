@@ -10,4 +10,5 @@ android {
 dependencies {
     implementation(project(":observability-sdk:data"))
     implementation(project(":observability-sdk:domain"))
+    implementation(libs.ktor.client.okhttp)
 }

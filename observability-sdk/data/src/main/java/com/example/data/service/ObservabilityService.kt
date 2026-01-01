@@ -13,9 +13,11 @@ class ObservabilityService(
   private val httpClient: HttpClient
 ): ObservabilityService {
   override suspend fun addScreen(name : String): Result<Any> {
+    logger.debug("ObservabilityService::addScreen")
     return httpClient.doPost<Result<HttpResponse>>(
       route = "api/observability/addScreen",
-      body = """{"id: asdasdsa, name": "$name"}"""
+      logger = logger,
+      body = "Screen(name = name, id = )"
     ).onFailure {
       val failure = it as Failure
 
@@ -32,14 +34,17 @@ class ObservabilityService(
   }
 
   override suspend fun addIncidentTrack(body : String) {
+    logger.debug("ObservabilityService::addIncidentTrack")
     TODO("Not yet implemented")
   }
 
   override suspend fun getAllScreens() : List<String> {
+    logger.debug("ObservabilityService::getAllScreens")
     TODO("Not yet implemented")
   }
 
   override suspend fun backupScreens(body : String) {
+    logger.debug("ObservabilityService::backupScreens00")
     TODO("Not yet implemented")
   }
 }
