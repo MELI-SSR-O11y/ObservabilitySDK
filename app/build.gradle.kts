@@ -25,6 +25,10 @@ android {
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
+    create("dev") {
+      initWith(getByName("debug"))
+      isDebuggable = true
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -39,9 +43,12 @@ android {
 }
 
 dependencies {
-  implementation(files("libs/presentation-debug.aar"))
-  implementation(files("libs/domain-debug.aar"))
-  implementation(files("libs/data-debug.aar"))
+//  implementation(files("libs/presentation-dev.aar"))
+//  implementation(files("libs/domain-dev.aar"))
+//  implementation(files("libs/data-dev.aar"))
+  implementation(project(":observability-sdk:presentation"))
+  implementation(project(":observability-sdk:domain"))
+  implementation(project(":observability-sdk:data"))
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
