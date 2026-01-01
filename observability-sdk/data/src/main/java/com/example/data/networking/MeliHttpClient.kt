@@ -19,9 +19,9 @@ data class Screen(
   val id: String,
   val name: String
 )
-suspend inline fun <reified HttpResponse: Any> HttpClient.doPost(
+suspend inline fun <reified Body, reified HttpResponse: Any> HttpClient.doPost(
   route: String,
-  body: String? = null,
+  body: Body? = null,
   logger: IMeliLogger,
   crossinline builder: HttpRequestBuilder.() -> Unit = {}
 ): Result<HttpResponse> {
@@ -31,9 +31,7 @@ suspend inline fun <reified HttpResponse: Any> HttpClient.doPost(
     execute = {
       post {
         url(url)
-        setBody(
-          Screen(id = "zsdvfd", name = "Pantalla95")
-        )
+        setBody(body)
         builder()
       }
     }, logger = logger
