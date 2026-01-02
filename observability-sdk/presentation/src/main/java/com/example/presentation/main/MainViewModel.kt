@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.domain.usecases.GetAllScreensUseCase
 import com.example.domain.usecases.InsertIncidentTrackerUseCase
 import com.example.domain.usecases.InsertScreenUseCase
+import com.example.domain.util.EIncidentSeverity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,11 +32,11 @@ class MainViewModel(
         isLoading = false,
         incidentsQuantity = screens.sumOf { it.incidentTrackers.size },
         screensQuantity = screens.size,
-        debugSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == "DEBUG" } },
-        infoSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == "INFO" } },
-        warningSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == "WARNING" } },
-        errorSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == "ERROR" } },
-        criticalSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == "CRITICAL" } },
+        debugSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.DEBUG } },
+        infoSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.INFO } },
+        warningSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.WARNING } },
+        errorSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.ERROR } },
+        criticalSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.CRITICAL } },
       )
     }.catch { throwable ->
       emit(_internalState.value.copy(error = throwable.message, isLoading = false))
