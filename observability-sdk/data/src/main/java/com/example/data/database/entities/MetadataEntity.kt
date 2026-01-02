@@ -22,4 +22,5 @@ data class MetadataEntity(
   val key : String,
   val value : String,
   val pkIncident : String,
+  val isSync : Boolean = false
 )

@@ -10,9 +10,11 @@ import com.example.data.database.daos.ScreenDao
 import com.example.data.database.entities.IncidentTrackerEntity
 import com.example.data.database.entities.MetadataEntity
 import com.example.data.database.entities.ScreenEntity
+import com.example.data.database.migrations.MIGRATION_1_2
 
 @Database(
-  entities = [ScreenEntity::class, IncidentTrackerEntity::class, MetadataEntity::class], version = 1
+  entities = [ScreenEntity::class, IncidentTrackerEntity::class, MetadataEntity::class], 
+  version = 2
 )
 abstract class MeliDatabase: RoomDatabase() {
 
@@ -29,7 +31,7 @@ abstract class MeliDatabase: RoomDatabase() {
       if(instance == null) {
         instance = Room.databaseBuilder(
           context.applicationContext, MeliDatabase::class.java, "MELI"
-        ).build()
+        ).addMigrations(MIGRATION_1_2).build()
       }
       return instance!!
     }

@@ -23,4 +23,5 @@ data class IncidentTrackerEntity(
   val message : String,
   val severity : String,
   val pkScreen : String,
+  val isSync : Boolean = false
 )
