@@ -17,20 +17,7 @@ class SumImpl: ISumTest {
     val client = HttpClientFactory(logger).create(engine)
     val service = ObservabilityService(logger, client)
     CoroutineScope(IO).launch {
-      service.addScreen("Pantalla 95").onSuccess { value ->
-        value
-        logger.debug("Success")
-        logger.debug(value.toString())
-        Log.e("Success", value.toString())
-      }.onFailure { error->
-        error as com.example.data.networking.Failure
-        error.error
-        error.message
-        logger.debug("Failure")
-        logger.debug(error.message ?: "Unknown error")
-        Log.e("Failure", error.message ?: "Unknown error")
-        error.message
-      }
+      service.addScreen("")
     }
     return a+b-1
   }
