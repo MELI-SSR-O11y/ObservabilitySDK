@@ -78,6 +78,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 add("androidTestImplementation", libs.findLibrary("androidx.junit").get())
                 add("androidTestImplementation", libs.findLibrary("androidx.espresso.core").get())
                 add("implementation", libs.findLibrary("touchlab.kermit").get())
+                add("implementation", libs.findLibrary("koin.core").get())
+                add("implementation", libs.findLibrary("koin.compose.viewmodel").get())
             }
         }
     }
