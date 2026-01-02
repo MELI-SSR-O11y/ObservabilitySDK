@@ -1,8 +1,10 @@
 package com.example.data.di
 
 import com.example.data.database.MeliDatabase
+import com.example.data.logger.MeliLogger
 import com.example.data.repository.IncidentTrackerRepositoryImpl
 import com.example.data.repository.ScreenRepositoryImpl
+import com.example.domain.logger.IMeliLogger
 import com.example.domain.repositories.IncidentTrackerRepository
 import com.example.domain.repositories.ScreenRepository
 import org.koin.android.ext.koin.androidContext
@@ -16,6 +18,8 @@ val dataModule = module {
     single {
         MeliDatabase.getInstance(androidContext())
     }
+
+    singleOf(::MeliLogger) bind IMeliLogger::class
 
     // DAOs
     single { get<MeliDatabase>().screensDao() }

@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface ScreenRepository {
   suspend fun insertScreen(name: String)
-  suspend fun getAllScreens(): Flow<List<Screen>>
+  fun getAllScreens(): Flow<List<Screen>>
 }

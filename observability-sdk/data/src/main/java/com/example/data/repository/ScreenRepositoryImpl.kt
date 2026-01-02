@@ -34,7 +34,7 @@ class ScreenRepositoryImpl(
     }
   }
 
-  override suspend fun getAllScreens() : Flow<List<Screen>> {
+  override fun getAllScreens() : Flow<List<Screen>> {
     return screenDao.getScreensWithRelations().map { screensWithIncidents ->
       screensWithIncidents.map { screenWithIncidents ->
         val incidents = screenWithIncidents.incidents.map { incidentWithMetadata ->
