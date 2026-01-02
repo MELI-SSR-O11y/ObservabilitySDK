@@ -1,49 +1,50 @@
 package com.example.data.service
 
-import com.example.data.networking.Screen
 import com.example.data.networking.doGet
 import com.example.data.networking.doPost
 import com.example.domain.logger.IMeliLogger
+import com.example.domain.models.IncidentTracker
+import com.example.domain.models.Screen
 import com.example.domain.service.ObservabilityService
 import io.ktor.client.HttpClient
-import io.ktor.client.statement.HttpResponse
+import kotlin.Result
 
 class ObservabilityService(
   private val logger: IMeliLogger,
   private val httpClient: HttpClient
 ): ObservabilityService {
-  override suspend fun addScreen(name : String) {
+  override suspend fun <HttpResponse> addScreen(screen : Screen) : Result<HttpResponse> {
     logger.debug("ObservabilityService::addScreen")
-    httpClient.doPost<Screen, Result<HttpResponse>>(
+    return httpClient.doPost(
       route = "api/observability/addScreen",
       logger = logger,
-      body = Screen(id = "vdsgdbfg", name = "vff")
+      body = screen
     )
   }
 
-  override suspend fun addIncidentTrack(body : String) {
+  override suspend fun <HttpResponse> addIncidentTrack(incidentTrack: IncidentTracker) : Result<HttpResponse> {
     logger.debug("ObservabilityService::addIncidentTrack")
-    httpClient.doPost<Any, Result<HttpResponse>>(
+    return httpClient.doPost(
       route = "api/observability/addIncidentTrack",
       logger = logger,
-      body = Any()
+      body = incidentTrack
     )
   }
 
-  override suspend fun getAllScreens() {
+  override suspend fun <HttpResponse> getAllScreens() : Result<HttpResponse> {
     logger.debug("ObservabilityService::getAllScreens")
-    httpClient.doGet<Result<HttpResponse>>(
+    return httpClient.doGet(
       route = "api/observability/getAllScreens",
       logger = logger
     )
   }
 
-  override suspend fun backupScreens(body : String) {
+  override suspend fun <HttpResponse> pushScreens(screen : List<Screen>) : Result<HttpResponse> {
     logger.debug("ObservabilityService::backupScreens00")
-    httpClient.doPost<Any, Result<HttpResponse>>(
+    return httpClient.doPost(
       route = "api/observability/backupScreens",
       logger = logger,
-      body = Any()
+      body = screen
     )
   }
 }

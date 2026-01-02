@@ -4,5 +4,5 @@ import androidx.lifecycle.ViewModel
 import com.example.domain.usecases.InsertIncidentTrackerUseCase
 
 class MainViewModel(private val insertIncidentTrackerUseCase: InsertIncidentTrackerUseCase) : ViewModel() {
-    // Aquí puedes añadir la lógica de tu ViewModel
+
 }

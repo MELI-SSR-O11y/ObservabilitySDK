@@ -12,13 +12,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class Screen(
-  val id: String,
-  val name: String
-)
 suspend inline fun <reified Body, reified HttpResponse: Any> HttpClient.doPost(
   route: String,
   body: Body? = null,
