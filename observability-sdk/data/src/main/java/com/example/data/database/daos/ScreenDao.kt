@@ -17,4 +17,7 @@ interface ScreenDao: GenericDao<ScreenEntity> {
   @Query("SELECT EXISTS(SELECT 1 FROM screen WHERE name = :screen)")
   suspend fun existByName(screen: String): Boolean
 
+  @Query("SELECT * FROM screen WHERE isSync = 0")
+  suspend fun getAllNotSync(): List<ScreenEntity>
+
 }

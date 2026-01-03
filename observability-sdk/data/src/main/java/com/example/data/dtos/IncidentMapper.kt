@@ -12,7 +12,8 @@ fun IncidentTrackerEntity.toIncidentTracker(metadata: List<Metadata>): IncidentT
         message = this.message,
         severity = EIncidentSeverity.valueOf(this.severity),
         pkScreen = this.pkScreen,
-        metadata = metadata
+        metadata = metadata,
+        isSync = this.isSync
     )
 }
 
@@ -23,6 +24,6 @@ fun IncidentTracker.toEntity(): IncidentTrackerEntity {
         message = this.message,
         severity = this.severity.name,
         pkScreen = this.pkScreen,
-        isSync = true
+        isSync = false
     )
 }

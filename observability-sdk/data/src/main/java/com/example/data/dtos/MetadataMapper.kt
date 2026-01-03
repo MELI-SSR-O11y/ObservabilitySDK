@@ -7,7 +7,8 @@ fun MetadataEntity.toMetadata(): Metadata {
     return Metadata(
         id = this.id,
         key = this.key,
-        value = this.value
+        value = this.value,
+        isSync = this.isSync
     )
 }
 

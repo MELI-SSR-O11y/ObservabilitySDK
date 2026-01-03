@@ -8,7 +8,8 @@ fun ScreenEntity.toScreen(incidentTrackers: List<IncidentTracker>): Screen {
     return Screen(
         id = this.id,
         name = this.name,
-        incidentTrackers = incidentTrackers
+        incidentTrackers = incidentTrackers,
+        isSync = this.isSync
     )
 }
 

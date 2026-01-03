@@ -1,5 +1,8 @@
 package com.example.data.repository
 
+import androidx.room.Transaction
+import com.example.data.database.daos.IncidentDao
+import com.example.data.database.daos.MetadataDao
 import com.example.data.database.daos.ScreenDao
 import com.example.data.database.entities.ScreenEntity
 import com.example.data.dtos.toIncidentTracker
@@ -17,6 +20,9 @@ import kotlinx.coroutines.flow.map
 
 class ScreenRepositoryImpl(
   private val screenDao : ScreenDao,
+  private val incidentDao : IncidentDao,
+  private val metadataDao : MetadataDao,
+  private val api : IObservabilityService,
   private val service : IObservabilityService,
   private val logger : IMeliLogger
 ): ScreenRepository {
@@ -43,6 +49,37 @@ class ScreenRepositoryImpl(
           incidentWithMetadata.incident.toIncidentTracker(metadata)
         }
         screenWithIncidents.screen.toScreen(incidents)
+      }
+    }
+  }
+
+  @Transaction
+  override suspend fun syncToRemote() {
+    logger.debug("ScreenRepositoryImpl::syncToRemote::Start")
+    val metadataNotPushEntity = metadataDao.getAllNotSync()
+    val incidentNotPushEntity = incidentDao.getAllNotSync()
+    val screensNotPushEntity = screenDao.getAllNotSync()
+
+    val screens = screensNotPushEntity.map { screen ->
+      screen.toScreen(incidentNotPushEntity.filter { incident -> incident.pkScreen == screen.id }
+        .map { incident ->
+          incident.toIncidentTracker(metadataNotPushEntity.filter { metadata ->
+            metadata.pkIncident == incident.id
+          }.map {
+            it.toMetadata()
+          })
+        })
+    }
+
+    api.pushScreens<HttpResponse>(screens).onSuccess {
+      metadataNotPushEntity.forEach { metadata ->
+        metadataDao.upsert(metadata.copy(isSync = true))
+      }
+      incidentNotPushEntity.forEach { incident ->
+        incidentDao.upsert(incident.copy(isSync = true))
+      }
+      screensNotPushEntity.forEach { screen ->
+        screenDao.upsert(screen.copy(isSync = true))
       }
     }
   }

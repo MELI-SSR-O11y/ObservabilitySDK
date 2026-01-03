@@ -10,6 +10,7 @@ data class MainState(
     val screens: List<Screen> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null,
+    val isSync: Boolean = false,
     val screensQuantity: Int = 0,
     val incidentsQuantity: Int = 0,
     val debugSeverityQuantity: Int = 0,
@@ -25,4 +26,5 @@ data class MainState(
 sealed class MainActions {
     data class InsertScreen(val name: String) : MainActions()
     data class InsertIncident(val incident: IncidentTracker) : MainActions()
+    object SyncToRemote : MainActions()
 }

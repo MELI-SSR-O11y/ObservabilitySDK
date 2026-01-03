@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.domain.models.IncidentTracker
 import com.example.observabilitysdk.ui.theme.ObservabilitySDKTheme
 import com.example.presentation.main.MainActions
 import com.example.presentation.main.ContractViewModel
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewModel()) {
 
     val state by sdk.state.collectAsStateWithLifecycle()
+    val onEvent = sdk::onEvent
 
     Column(modifier = modifier) {
         if (state.isLoading) {
@@ -53,9 +55,30 @@ fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewM
             Text(text = "Error: ${state.errorSeverityQuantity}")
             Text(text = "Critical: ${state.criticalSeverityQuantity}")
             Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Is Sync: ${state.isSync}")
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { sdk.onEvent(MainActions.InsertScreen("New Screen")) }) {
                 Text("Add Screen")
+            }
+            Button(onClick = {
+                onEvent(
+                    MainActions.InsertIncident(
+                        IncidentTracker(
+                            errorCode = 500,
+                            message = "Servidor",
+                            severity = com.example.domain.util.EIncidentSeverity.CRITICAL,
+                            pkScreen = "3547b664-8469-4d60-897d-cd212e4bf7e7",
+                            metadata = listOf(
+                                com.example.domain.models.Metadata(
+                                    key = "key",
+                                    value = "value"
+                                )
+                            )
+                        )
+                    )
+                ) }) {
+                Text("Add Event")
             }
         }
     }

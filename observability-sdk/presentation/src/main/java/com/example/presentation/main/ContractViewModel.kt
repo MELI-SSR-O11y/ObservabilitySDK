@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.domain.usecases.GetAllScreensUseCase
 import com.example.domain.usecases.InsertIncidentTrackerUseCase
 import com.example.domain.usecases.InsertScreenUseCase
+import com.example.domain.usecases.SyncToRemoteUseCase
 import com.example.domain.util.EIncidentSeverity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 class ContractViewModel(
     private val insertIncidentTrackerUseCase: InsertIncidentTrackerUseCase,
     private val insertScreenUseCase: InsertScreenUseCase,
-    getAllScreensUseCase: GetAllScreensUseCase
+    getAllScreensUseCase: GetAllScreensUseCase,
+    private val syncToRemoteUseCase: SyncToRemoteUseCase,
 ) : ViewModel(), ContractObservabilityApi {
 
     private val _internalState = MutableStateFlow(MainState())
@@ -38,6 +40,7 @@ class ContractViewModel(
             warningSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.WARNING },
             errorSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.ERROR },
             criticalSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.CRITICAL },
+            isSync = !(screens.any { !it.isSync } || allIncidents.any { !it.isSync } || allIncidents.any { it.metadata.any { meta -> !meta.isSync }}),
         )
     }.catch { throwable ->
         emit(_internalState.value.copy(error = throwable.message, isLoading = false))
@@ -51,6 +54,7 @@ class ContractViewModel(
         when (event) {
             is MainActions.InsertScreen -> insertScreen(event.name)
             is MainActions.InsertIncident -> insertIncident(event.incident)
+            is MainActions.SyncToRemote -> viewModelScope.launch { syncToRemoteUseCase() }
         }
     }
 
