@@ -47,10 +47,10 @@ class ContractViewModel(
         initialValue = MainState()
     )
 
-    override fun onEvent(action: MainActions) {
-        when (action) {
-            is MainActions.InsertScreen -> insertScreen(action.name)
-            is MainActions.InsertIncident -> insertIncident(action.incident)
+    override fun onEvent(event: MainActions) {
+        when (event) {
+            is MainActions.InsertScreen -> insertScreen(event.name)
+            is MainActions.InsertIncident -> insertIncident(event.incident)
         }
     }
 

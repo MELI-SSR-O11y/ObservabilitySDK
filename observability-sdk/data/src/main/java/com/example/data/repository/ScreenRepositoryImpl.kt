@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.database.MeliDatabase
+import com.example.data.database.daos.ScreenDao
 import com.example.data.database.entities.ScreenEntity
 import com.example.data.dtos.toIncidentTracker
 import com.example.data.dtos.toMetadata
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class ScreenRepositoryImpl(
-  private val screenDao : MeliDatabase,
+  private val screenDao : ScreenDao,
   private val service : IObservabilityService,
   private val logger : IMeliLogger
 ): ScreenRepository {
@@ -24,10 +24,11 @@ class ScreenRepositoryImpl(
   @ExperimentalUuidApi
   override suspend fun insertScreen(name : String) {
     logger.debug("ScreenRepositoryImpl::insertScreen")
+    if(screenDao.existByName(screen = name)) return
     val newScreen = ScreenEntity(id = Uuid.random().toString(), name = name)
-    screenDao.screensDao().create(newScreen)
+    screenDao.create(newScreen)
     service.addScreen<HttpResponse>(screen = newScreen.toScreen(listOf())).onSuccess {
-      screenDao.screensDao().upsert(newScreen.copy(isSync = true))
+      screenDao.upsert(newScreen.copy(isSync = true))
       logger.info("ScreenRepositoryImpl::insertScreen -> Se envio la pantalla al servidor")
     }.onFailure {
       logger.warn("ScreenRepositoryImpl::insertScreen -> No se envio la pantalla al servidor")
@@ -35,7 +36,7 @@ class ScreenRepositoryImpl(
   }
 
   override fun getAllScreens() : Flow<List<Screen>> {
-    return screenDao.screensDao().getScreensWithRelations().map { screensWithIncidents ->
+    return screenDao.getScreensWithRelations().map { screensWithIncidents ->
       screensWithIncidents.map { screenWithIncidents ->
         val incidents = screenWithIncidents.incidents.map { incidentWithMetadata ->
           val metadata = incidentWithMetadata.metadata.map { it.toMetadata() }

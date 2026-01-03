@@ -14,4 +14,7 @@ interface ScreenDao: GenericDao<ScreenEntity> {
   @Query("SELECT * FROM screen")
   fun getScreensWithRelations(): Flow<List<ScreenWithIncidents>>
 
+  @Query("SELECT EXISTS(SELECT 1 FROM screen WHERE name = :screen)")
+  suspend fun existByName(screen: String): Boolean
+
 }
