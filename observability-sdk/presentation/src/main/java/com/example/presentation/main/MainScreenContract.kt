@@ -8,7 +8,7 @@ import com.example.domain.models.Screen
  */
 data class MainState(
     val screens: List<Screen> = emptyList(),
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val error: String? = null,
     val isSync: Boolean = false,
     val screensQuantity: Int = 0,

@@ -7,6 +7,7 @@ import com.example.domain.usecases.InsertIncidentTrackerUseCase
 import com.example.domain.usecases.InsertScreenUseCase
 import com.example.domain.usecases.SyncToRemoteUseCase
 import com.example.domain.util.EIncidentSeverity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +33,7 @@ class ContractViewModel(
         val allIncidents = screens.flatMap { it.incidentTrackers }
         internalState.copy(
             screens = screens,
-            isLoading = false,
+            isLoading = _internalState.value.isLoading,
             incidentsQuantity = allIncidents.size,
             screensQuantity = screens.size,
             debugSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.DEBUG },
@@ -51,23 +52,26 @@ class ContractViewModel(
     )
 
     override fun onEvent(event: MainActions) {
+        _internalState.update { it.copy(isLoading = true) }
         when (event) {
             is MainActions.InsertScreen -> insertScreen(event.name)
             is MainActions.InsertIncident -> insertIncident(event.incident)
-            is MainActions.SyncToRemote -> viewModelScope.launch { syncToRemoteUseCase() }
+            is MainActions.SyncToRemote -> viewModelScope.launch { syncToRemoteUseCase()}
+        }
+        viewModelScope.launch {
+            delay(1500)
+            _internalState.update { it.copy(isLoading = false) }
         }
     }
 
     private fun insertScreen(name: String) {
         viewModelScope.launch {
-            _internalState.update { it.copy(isLoading = true) }
             insertScreenUseCase(name)
         }
     }
 
     private fun insertIncident(incident: com.example.domain.models.IncidentTracker) {
         viewModelScope.launch {
-            _internalState.update { it.copy(isLoading = true) }
             insertIncidentTrackerUseCase(incident)
         }
     }

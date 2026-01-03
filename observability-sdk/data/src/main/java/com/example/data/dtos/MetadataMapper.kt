@@ -18,6 +18,6 @@ fun Metadata.toEntity(incidentId: String): MetadataEntity {
         key = this.key,
         value = this.value,
         pkIncident = incidentId,
-        isSync = true
+        isSync = false
     )
 }

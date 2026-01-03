@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,42 +45,45 @@ fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewM
 
     Column(modifier = modifier) {
         if (state.isLoading) {
-            CircularProgressIndicator()
-        } else {
-            Text(text = "Screens: ${state.screensQuantity}")
-            Text(text = "Incidents: ${state.incidentsQuantity}")
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Debug: ${state.debugSeverityQuantity}")
-            Text(text = "Info: ${state.infoSeverityQuantity}")
-            Text(text = "Warning: ${state.warningSeverityQuantity}")
-            Text(text = "Error: ${state.errorSeverityQuantity}")
-            Text(text = "Critical: ${state.criticalSeverityQuantity}")
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Is Sync: ${state.isSync}")
-            Spacer(modifier = Modifier.height(16.dp))
+            LinearProgressIndicator(modifier = Modifier.height(4.dp).fillMaxWidth())
+        }
+        Text(text = "Screens: ${state.screensQuantity}")
+        Text(text = "Incidents: ${state.incidentsQuantity}")
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Debug: ${state.debugSeverityQuantity}")
+        Text(text = "Info: ${state.infoSeverityQuantity}")
+        Text(text = "Warning: ${state.warningSeverityQuantity}")
+        Text(text = "Error: ${state.errorSeverityQuantity}")
+        Text(text = "Critical: ${state.criticalSeverityQuantity}")
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Is Sync: ${state.isSync}")
+        Text(text = "Is Loading: ${state.isLoading}")
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { sdk.onEvent(MainActions.InsertScreen("New Screen")) }) {
-                Text("Add Screen")
-            }
-            Button(onClick = {
-                onEvent(
-                    MainActions.InsertIncident(
-                        IncidentTracker(
-                            errorCode = 500,
-                            message = "Servidor",
-                            severity = com.example.domain.util.EIncidentSeverity.CRITICAL,
-                            pkScreen = "3547b664-8469-4d60-897d-cd212e4bf7e7",
-                            metadata = listOf(
-                                com.example.domain.models.Metadata(
-                                    key = "key",
-                                    value = "value"
-                                )
+        Button(onClick = { onEvent(MainActions.InsertScreen("New Screen")) }) {
+            Text("Add Screen")
+        }
+        Button(onClick = {
+            onEvent(
+                MainActions.InsertIncident(
+                    IncidentTracker(
+                        errorCode = 500,
+                        message = "Servidor",
+                        severity = com.example.domain.util.EIncidentSeverity.INFO,
+                        pkScreen = "6c23c66d-8e36-46e9-b66d-bdfccdfe594f",
+                        metadata = listOf(
+                            com.example.domain.models.Metadata(
+                                key = "key", value = "value"
                             )
                         )
                     )
-                ) }) {
-                Text("Add Event")
-            }
+                )
+            )
+        }) {
+            Text("Add Event")
+        }
+        Button(onClick = { onEvent(MainActions.SyncToRemote) }) {
+            Text("Sync To Remote")
         }
     }
 }

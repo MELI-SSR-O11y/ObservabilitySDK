@@ -18,7 +18,7 @@ class IncidentTrackerRepositoryImpl(
 ): IncidentTrackerRepository {
   @Transaction
   override suspend fun insertIncidentTracker(incidentTracker : IncidentTracker) {
-    logger.debug("IncidentTrackerRepositoryImpl::insertIncidentTracker")
+    logger.debug("IncidentTrackerRepositoryImpl::insertIncidentTracker::Init")
     val incidentEntity = incidentTracker.toEntity()
     incidentDao.create(incidentEntity)
     incidentTracker.metadata.forEach { metadata ->
@@ -30,7 +30,7 @@ class IncidentTrackerRepositoryImpl(
         metadataDao.upsert(metadata.toEntity(incidentEntity.id).copy(isSync = true))
       }
     }.onFailure {
-      logger.error("IncidentTrackerRepositoryImpl::insertIncidentTracker", it)
+      logger.error("IncidentTrackerRepositoryImpl::insertIncidentTracker::Fail", it)
     }
   }
 }
