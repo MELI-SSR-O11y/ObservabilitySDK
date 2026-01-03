@@ -1,31 +1,50 @@
 package com.example.data.di
 
+import androidx.room.Room
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.example.data.database.MeliDatabase
+import com.example.data.database.migrations.MIGRATION_1_2
 import com.example.data.logger.MeliLogger
+import com.example.data.networking.HttpClientFactory
 import com.example.data.repository.IncidentTrackerRepositoryImpl
 import com.example.data.repository.ScreenRepositoryImpl
+import com.example.data.service.ObservabilityService
 import com.example.domain.logger.IMeliLogger
 import com.example.domain.repositories.IncidentTrackerRepository
 import com.example.domain.repositories.ScreenRepository
+import com.example.domain.service.IObservabilityService
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val dataModule = module {
 
     // Database
-    single {
-        MeliDatabase.getInstance(androidContext())
+    single<MeliDatabase> {
+        Room.databaseBuilder(
+            androidContext(), MeliDatabase::class.java, "MELI_Observability.db"
+        ).addMigrations(MIGRATION_1_2).setDriver(BundledSQLiteDriver()).build()
     }
-
-    singleOf(::MeliLogger) bind IMeliLogger::class
 
     // DAOs
     single { get<MeliDatabase>().screensDao() }
     single { get<MeliDatabase>().incidentDao() }
     single { get<MeliDatabase>().metadataDao() }
 
-    singleOf(::IncidentTrackerRepositoryImpl) bind IncidentTrackerRepository::class
-    singleOf(::ScreenRepositoryImpl) bind ScreenRepository::class
+    // Logger
+    single { MeliLogger() } bind IMeliLogger::class
+
+    // Networking
+    single { OkHttp.create() } bind HttpClientEngine::class
+    single {
+        HttpClientFactory(get<IMeliLogger>()).create(get()) // Koin infiere HttpClientEngine
+    } bind HttpClient::class
+    single { ObservabilityService(get<IMeliLogger>(), get<HttpClient>()) } bind IObservabilityService::class
+
+    // Repositories
+    single { IncidentTrackerRepositoryImpl(get(), get(), get()) } bind IncidentTrackerRepository::class
+    single { ScreenRepositoryImpl(get(), get(), get()) } bind ScreenRepository::class
 }

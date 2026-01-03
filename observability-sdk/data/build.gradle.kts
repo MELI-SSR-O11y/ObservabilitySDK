@@ -1,6 +1,7 @@
 plugins {
   id("observability.android.library")
   alias(libs.plugins.kotlin.android)
+  id("kotlin-kapt")
 }
 
 android {
@@ -14,4 +15,5 @@ dependencies {
   implementation(libs.androidx.room.runtime)
   implementation(libs.sqlite.bundled)
   implementation(libs.bundles.koin.common)
+  kapt(libs.androidx.room.compiler)
 }

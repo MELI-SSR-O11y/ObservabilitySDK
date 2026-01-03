@@ -5,14 +5,14 @@ import com.example.data.networking.doPost
 import com.example.domain.logger.IMeliLogger
 import com.example.domain.models.IncidentTracker
 import com.example.domain.models.Screen
-import com.example.domain.service.ObservabilityService
+import com.example.domain.service.IObservabilityService
 import io.ktor.client.HttpClient
 import kotlin.Result
 
 class ObservabilityService(
   private val logger: IMeliLogger,
   private val httpClient: HttpClient
-): ObservabilityService {
+): IObservabilityService {
   override suspend fun <HttpResponse> addScreen(screen : Screen) : Result<HttpResponse> {
     logger.debug("ObservabilityService::addScreen")
     return httpClient.doPost(

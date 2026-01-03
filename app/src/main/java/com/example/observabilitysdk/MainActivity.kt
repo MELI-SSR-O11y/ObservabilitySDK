@@ -36,8 +36,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-    val api: MainViewModel = koinViewModel()
+fun MainScreen(modifier: Modifier = Modifier, api: MainViewModel = koinViewModel()) {
 
     val state by api.state.collectAsStateWithLifecycle()
 
