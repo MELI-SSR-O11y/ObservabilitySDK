@@ -6,8 +6,7 @@ import com.example.domain.usecases.InsertScreenUseCase
 import org.koin.dsl.module
 
 val domainModule = module {
-    
-    // Use Cases
+
     factory { InsertIncidentTrackerUseCase(incidentTrackerRepository = get()) }
     factory { InsertScreenUseCase(screenRepository = get()) }
     factory { GetAllScreensUseCase(screenRepository = get()) }

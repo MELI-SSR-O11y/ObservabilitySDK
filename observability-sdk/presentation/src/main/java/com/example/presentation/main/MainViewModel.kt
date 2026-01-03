@@ -19,53 +19,52 @@ class MainViewModel(
     private val insertIncidentTrackerUseCase: InsertIncidentTrackerUseCase,
     private val insertScreenUseCase: InsertScreenUseCase,
     getAllScreensUseCase: GetAllScreensUseCase
-) : ViewModel() {
+) : ViewModel(), ContractObservabilityApi {
 
-    private val _internalState = MutableStateFlow(MainScreenAction())
+    private val _internalState = MutableStateFlow(MainState())
 
-    val state: StateFlow<MainScreenAction> = combine(
+    override val state: StateFlow<MainState> = combine(
         getAllScreensUseCase(),
         _internalState
     ) { screens, internalState ->
-      internalState.copy(
-        screens = screens,
-        isLoading = false,
-        incidentsQuantity = screens.sumOf { it.incidentTrackers.size },
-        screensQuantity = screens.size,
-        debugSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.DEBUG } },
-        infoSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.INFO } },
-        warningSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.WARNING } },
-        errorSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.ERROR } },
-        criticalSeverityQuantity = screens.sumOf { screen -> screen.incidentTrackers.count { it.severity == EIncidentSeverity.CRITICAL } },
-      )
+        val allIncidents = screens.flatMap { it.incidentTrackers }
+        internalState.copy(
+            screens = screens,
+            isLoading = false,
+            incidentsQuantity = allIncidents.size,
+            screensQuantity = screens.size,
+            debugSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.DEBUG },
+            infoSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.INFO },
+            warningSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.WARNING },
+            errorSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.ERROR },
+            criticalSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.CRITICAL },
+        )
     }.catch { throwable ->
-      emit(_internalState.value.copy(error = throwable.message, isLoading = false))
+        emit(_internalState.value.copy(error = throwable.message, isLoading = false))
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = MainScreenAction()
+        initialValue = MainState()
     )
 
-    fun onEvent(action: MainScreenContract) {
+    override fun onEvent(action: MainActions) {
         when (action) {
-            is MainScreenContract.InsertScreen -> insertScreen(action.name)
-            is MainScreenContract.InsertIncident -> insertIncident(action.incident)
+            is MainActions.InsertScreen -> insertScreen(action.name)
+            is MainActions.InsertIncident -> insertIncident(action.incident)
         }
     }
 
     private fun insertScreen(name: String) {
-      viewModelScope.launch {
-        _internalState.update { it.copy(isLoading = true) }
-        insertScreenUseCase(name)
-        _internalState.update { it.copy(isLoading = false) }
-      }
+        viewModelScope.launch {
+            _internalState.update { it.copy(isLoading = true) }
+            insertScreenUseCase(name)
+        }
     }
 
     private fun insertIncident(incident: com.example.domain.models.IncidentTracker) {
-      viewModelScope.launch {
-        _internalState.update { it.copy(isLoading = true) }
-        insertIncidentTrackerUseCase(incident)
-        _internalState.update { it.copy(isLoading = false) }
-      }
+        viewModelScope.launch {
+            _internalState.update { it.copy(isLoading = true) }
+            insertIncidentTrackerUseCase(incident)
+        }
     }
 }

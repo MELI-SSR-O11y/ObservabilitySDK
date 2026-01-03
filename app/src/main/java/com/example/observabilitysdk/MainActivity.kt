@@ -3,55 +3,61 @@ package com.example.observabilitysdk
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.observabilitysdk.ui.theme.ObservabilitySDKTheme
+import com.example.presentation.main.MainActions
+import com.example.presentation.main.MainViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
-class MainActivity: ComponentActivity() {
-  override fun onCreate(savedInstanceState : Bundle?) {
-    super.onCreate(savedInstanceState)
-    enableEdgeToEdge()
-    setContent {
-      ObservabilitySDKTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-          Greeting(
-            name = "TEST", modifier = Modifier.padding(innerPadding)
-          )
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            ObservabilitySDKTheme {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    MainScreen()
+                }
+            }
         }
-      }
     }
-  }
 }
 
 @Composable
-fun Greeting(name : String, modifier : Modifier = Modifier) {
-  Column(
-    modifier = Modifier.fillMaxSize(),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
-  ) {
-    OutlinedButton(onClick = {}) {
-      Text(text = name, textAlign = TextAlign.Unspecified)
+fun MainScreen(modifier: Modifier = Modifier) {
+    val api: MainViewModel = koinViewModel()
+
+    val state by api.state.collectAsStateWithLifecycle()
+
+    Column(modifier = modifier) {
+        if (state.isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Text(text = "Screens: ${state.screensQuantity}")
+            Text(text = "Incidents: ${state.incidentsQuantity}")
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Debug: ${state.debugSeverityQuantity}")
+            Text(text = "Info: ${state.infoSeverityQuantity}")
+            Text(text = "Warning: ${state.warningSeverityQuantity}")
+            Text(text = "Error: ${state.errorSeverityQuantity}")
+            Text(text = "Critical: ${state.criticalSeverityQuantity}")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { api.onEvent(MainActions.InsertScreen("New Screen")) }) {
+                Text("Add Screen")
+            }
+        }
     }
-  }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-  ObservabilitySDKTheme {
-    Greeting("Android")
-  }
 }
