@@ -25,6 +25,6 @@ data class MainState(
  */
 sealed class MainActions {
     data class InsertScreen(val name: String) : MainActions()
-    data class InsertIncident(val incident: IncidentTracker) : MainActions()
+    data class InsertIncident(val incident: IncidentTracker, val screenName: String) : MainActions()
     object SyncToRemote : MainActions()
 }

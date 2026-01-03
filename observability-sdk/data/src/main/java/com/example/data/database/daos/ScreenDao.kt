@@ -20,4 +20,7 @@ interface ScreenDao: GenericDao<ScreenEntity> {
   @Query("SELECT * FROM screen WHERE isSync = 0")
   suspend fun getAllNotSync(): List<ScreenEntity>
 
+  @Query("SELECT id FROM screen WHERE name = :screen")
+  suspend fun getIdByName(screen: String): String?
+
 }

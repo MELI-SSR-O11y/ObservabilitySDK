@@ -3,6 +3,7 @@ package com.example.data.repository
 import androidx.room.Transaction
 import com.example.data.database.daos.IncidentDao
 import com.example.data.database.daos.MetadataDao
+import com.example.data.database.daos.ScreenDao
 import com.example.data.dtos.toEntity
 import com.example.domain.logger.IMeliLogger
 import com.example.domain.models.IncidentTracker
@@ -13,12 +14,15 @@ import io.ktor.client.statement.HttpResponse
 class IncidentTrackerRepositoryImpl(
   private val incidentDao : IncidentDao,
   private val metadataDao : MetadataDao,
+  private val screenDao : ScreenDao,
   private val logger : IMeliLogger,
   private val api : IObservabilityService,
 ): IncidentTrackerRepository {
   @Transaction
-  override suspend fun insertIncidentTracker(incidentTracker : IncidentTracker) {
+  override suspend fun insertIncidentTracker(incidentTracker : IncidentTracker, screenName: String) {
     logger.debug("IncidentTrackerRepositoryImpl::insertIncidentTracker::Init")
+    val screenId = screenDao.getIdByName(screenName)
+    if (screenId == null) return
     val incidentEntity = incidentTracker.toEntity()
     incidentDao.create(incidentEntity)
     incidentTracker.metadata.forEach { metadata ->

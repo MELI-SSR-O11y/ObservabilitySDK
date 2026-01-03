@@ -60,7 +60,7 @@ fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewM
         Text(text = "Is Loading: ${state.isLoading}")
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { onEvent(MainActions.InsertScreen("New Screen")) }) {
+        Button(onClick = { onEvent(MainActions.InsertScreen("Pantalla 2")) }) {
             Text("Add Screen")
         }
         Button(onClick = {
@@ -69,14 +69,14 @@ fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewM
                     IncidentTracker(
                         errorCode = 500,
                         message = "Servidor",
-                        severity = com.example.domain.util.EIncidentSeverity.DEBUG,
+                        severity = com.example.domain.util.EIncidentSeverity.CRITICAL,
                         pkScreen = "fb852b03-47d6-431b-86e6-5eebefe98aa7",
                         metadata = listOf(
                             com.example.domain.models.Metadata(
                                 key = "key", value = "value"
                             )
                         )
-                    )
+                    ), "Pantalla 2"
                 )
             )
         }) {

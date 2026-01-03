@@ -55,11 +55,11 @@ class ContractViewModel(
         _internalState.update { it.copy(isLoading = true) }
         when (event) {
             is MainActions.InsertScreen -> insertScreen(event.name)
-            is MainActions.InsertIncident -> insertIncident(event.incident)
+            is MainActions.InsertIncident -> insertIncident(event.incident, event.screenName)
             is MainActions.SyncToRemote -> viewModelScope.launch { syncToRemoteUseCase()}
         }
         viewModelScope.launch {
-            delay(1500)
+            delay(1000)
             _internalState.update { it.copy(isLoading = false) }
         }
     }
@@ -70,9 +70,9 @@ class ContractViewModel(
         }
     }
 
-    private fun insertIncident(incident: com.example.domain.models.IncidentTracker) {
+    private fun insertIncident(incident: com.example.domain.models.IncidentTracker, screenName: String) {
         viewModelScope.launch {
-            insertIncidentTrackerUseCase(incident)
+            insertIncidentTrackerUseCase(incident, screenName)
         }
     }
 }
