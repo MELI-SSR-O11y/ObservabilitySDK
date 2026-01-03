@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.observabilitysdk.ui.theme.ObservabilitySDKTheme
 import com.example.presentation.main.MainActions
-import com.example.presentation.main.ContractObservabilityApi
+import com.example.presentation.main.ContractViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 class MainActivity : ComponentActivity() {
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier, sdk: ContractObservabilityApi = koinViewModel()) {
+fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewModel()) {
 
     val state by sdk.state.collectAsStateWithLifecycle()
 
