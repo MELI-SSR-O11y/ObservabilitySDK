@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -68,8 +69,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
     Column(
         modifier = modifier
+            .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState()) // Added for scrollability
+            .verticalScroll(rememberScrollState())
     ) {
         if (state.isLoading) {
             LinearProgressIndicator(modifier = Modifier.height(4.dp).fillMaxWidth())
@@ -81,7 +83,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
         // Gráfica de Torta
         SeverityPieChart(state)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Gráfica de Tiempo
         IncidentTimeSeriesChart(state)
@@ -130,7 +132,7 @@ private fun SeverityPieChart(state: MainState, modifier: Modifier = Modifier) {
     )
 
     if (severityData.isEmpty()) {
-        Text("No incident data to display.", modifier = modifier.padding(vertical = 32.dp))
+        Text("No incident data for pie chart.", modifier = modifier.padding(vertical = 32.dp))
         return
     }
 
@@ -160,10 +162,7 @@ private fun SeverityPieChart(state: MainState, modifier: Modifier = Modifier) {
                     }
                 }
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
-            // Leyenda
             Column(modifier = Modifier.weight(1f)) {
                 severityData.forEach { data ->
                     LegendItem(label = "${data.label} (${data.count})", color = data.color)
@@ -192,7 +191,8 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
     val allIncidents = state.screens.flatMap { it.incidentTrackers }
 
     if (allIncidents.size < 2) {
-        return // Not enough data to draw a meaningful chart
+        Text("Not enough data for time series chart.", modifier = modifier.padding(vertical = 32.dp))
+        return
     }
 
     val timestamps = allIncidents.map { it.timestamp }
@@ -201,87 +201,83 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
     val duration = Duration.ofMillis(maxTimestamp - minTimestamp)
 
     val (formatter, incidentsByTime) = when {
-        duration.toMinutes() < 120 -> {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            val map = allIncidents
-                .groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.MINUTES) }
-                .mapValues { it.value.size }
-                .toSortedMap()
-            formatter to map
-        }
-        duration.toHours() < 48 -> {
-            val formatter = DateTimeFormatter.ofPattern("d HH:00")
-            val map = allIncidents
-                .groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.HOURS) }
-                .mapValues { it.value.size }
-                .toSortedMap()
-            formatter to map
-        }
-        duration.toDays() < 60 -> {
-            val formatter = DateTimeFormatter.ofPattern("MMM d")
-            val map = allIncidents
-                .groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate() }
-                .mapValues { it.value.size }
-                .toSortedMap()
-            formatter to map
-        }
-        else -> {
-            val formatter = DateTimeFormatter.ofPattern("MMM yyyy")
-            val map = allIncidents
-                .groupBy { YearMonth.from(Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()) }
-                .mapValues { it.value.size }
-                .toSortedMap()
-            formatter to map
-        }
+        duration.toMinutes() < 120 -> DateTimeFormatter.ofPattern("HH:mm") to allIncidents.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.MINUTES) }.mapValues { it.value.size }.toSortedMap()
+        duration.toHours() < 48 -> DateTimeFormatter.ofPattern("d HH:00") to allIncidents.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.HOURS) }.mapValues { it.value.size }.toSortedMap()
+        duration.toDays() < 60 -> DateTimeFormatter.ofPattern("MMM d") to allIncidents.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate() }.mapValues { it.value.size }.toSortedMap()
+        else -> DateTimeFormatter.ofPattern("MMM yyyy") to allIncidents.groupBy { YearMonth.from(Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()) }.mapValues { it.value.size }.toSortedMap()
     }
 
     if (incidentsByTime.size < 2) {
-        return // Not enough distinct points to draw a line
+        Text("Data points are not distinct enough to draw a line chart.", modifier = modifier.padding(vertical = 32.dp))
+        return
     }
 
     val dataPoints = incidentsByTime.entries.toList()
     val maxIncidents = incidentsByTime.values.maxOrNull() ?: 1
     val lineChartColor = MaterialTheme.colorScheme.primary
+    val axisColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+    val yAxisLabelWidth = 40.dp
 
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Incidents Over Time", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Canvas(modifier = Modifier.fillMaxWidth().height(200.dp).padding(horizontal = 8.dp)) {
-            val xStep = size.width / (dataPoints.size - 1)
-            val yRatio = size.height / maxIncidents
-
-            for (i in 0 until dataPoints.size - 1) {
-                val p1 = dataPoints[i]
-                val p2 = dataPoints[i + 1]
-                val x1 = i * xStep
-                val y1 = size.height - (p1.value * yRatio)
-                val x2 = (i + 1) * xStep
-                val y2 = size.height - (p2.value * yRatio)
-
-                drawLine(
-                    color = lineChartColor,
-                    start = Offset(x1, y1),
-                    end = Offset(x2, y2),
-                    strokeWidth = 4f
-                )
+        Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            // Y-Axis Labels
+            Column(
+                modifier = Modifier.width(yAxisLabelWidth).fillMaxHeight(),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(maxIncidents.toString(), style = MaterialTheme.typography.bodySmall)
+                Text("0", style = MaterialTheme.typography.bodySmall)
             }
 
-            dataPoints.forEachIndexed { index, entry ->
-                val x = index * xStep
-                val y = size.height - (entry.value * yRatio)
-                drawCircle(color = lineChartColor, radius = 8f, center = Offset(x, y))
+            // Chart Canvas
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val chartWidth = size.width
+                val chartHeight = size.height
+
+                // Draw X and Y axes
+                drawLine(color = axisColor, start = Offset(0f, chartHeight), end = Offset(chartWidth, chartHeight), strokeWidth = 2f)
+                drawLine(color = axisColor, start = Offset(0f, 0f), end = Offset(0f, chartHeight), strokeWidth = 2f)
+
+                val xStep = chartWidth / (dataPoints.size - 1)
+                val yRatio = if (maxIncidents > 0) chartHeight / maxIncidents else 0f
+
+                // Draw the line and points
+                for (i in 0 until dataPoints.size - 1) {
+                    val p1 = dataPoints[i]
+                    val p2 = dataPoints[i + 1]
+                    val x1 = i * xStep
+                    val y1 = chartHeight - (p1.value * yRatio)
+                    val x2 = (i + 1) * xStep
+                    val y2 = chartHeight - (p2.value * yRatio)
+                    drawLine(color = lineChartColor, start = Offset(x1, y1), end = Offset(x2, y2), strokeWidth = 4f)
+                }
+                dataPoints.forEachIndexed { index, entry ->
+                    val x = index * xStep
+                    val y = chartHeight - (entry.value * yRatio)
+                    drawCircle(color = lineChartColor, radius = 8f, center = Offset(x, y))
+                }
             }
         }
 
+        // X-Axis Labels
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = yAxisLabelWidth),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val firstKey = dataPoints.first().key as Temporal
-            val lastKey = dataPoints.last().key as Temporal
-            Text(formatter.format(firstKey), style = MaterialTheme.typography.bodySmall)
-            Text(formatter.format(lastKey), style = MaterialTheme.typography.bodySmall)
+            val firstLabel = formatter.format(dataPoints.first().key as Temporal)
+            val lastLabel = formatter.format(dataPoints.last().key as Temporal)
+
+            Text(firstLabel, style = MaterialTheme.typography.bodySmall)
+            if (dataPoints.size > 2) {
+                val middleIndex = dataPoints.size / 2
+                val middleLabel = formatter.format(dataPoints[middleIndex].key as Temporal)
+                Text(middleLabel, style = MaterialTheme.typography.bodySmall)
+            }
+            Text(lastLabel, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
