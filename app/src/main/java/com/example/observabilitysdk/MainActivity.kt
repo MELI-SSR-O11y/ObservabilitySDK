@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.observabilitysdk.ui.theme.ObservabilitySDKTheme
 import com.example.presentation.main.MainActions
-import com.example.presentation.main.MainViewModel
+import com.example.presentation.main.ContractObservabilityApi
 import org.koin.compose.viewmodel.koinViewModel
 
 class MainActivity : ComponentActivity() {
@@ -36,9 +36,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier, api: MainViewModel = koinViewModel()) {
+fun MainScreen(modifier: Modifier = Modifier, sdk: ContractObservabilityApi = koinViewModel()) {
 
-    val state by api.state.collectAsStateWithLifecycle()
+    val state by sdk.state.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         if (state.isLoading) {
@@ -54,7 +54,7 @@ fun MainScreen(modifier: Modifier = Modifier, api: MainViewModel = koinViewModel
             Text(text = "Critical: ${state.criticalSeverityQuantity}")
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { api.onEvent(MainActions.InsertScreen("New Screen")) }) {
+            Button(onClick = { sdk.onEvent(MainActions.InsertScreen("New Screen")) }) {
                 Text("Add Screen")
             }
         }

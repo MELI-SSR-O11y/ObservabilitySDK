@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MainViewModel(
+internal class MainViewModel(
     private val insertIncidentTrackerUseCase: InsertIncidentTrackerUseCase,
     private val insertScreenUseCase: InsertScreenUseCase,
     getAllScreensUseCase: GetAllScreensUseCase
