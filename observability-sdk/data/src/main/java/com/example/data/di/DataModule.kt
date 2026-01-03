@@ -17,6 +17,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -40,11 +41,11 @@ val dataModule = module {
     // Networking
     single { OkHttp.create() } bind HttpClientEngine::class
     single {
-        HttpClientFactory(get<IMeliLogger>()).create(get()) // Koin infiere HttpClientEngine
+        HttpClientFactory(get<IMeliLogger>()).create(get())
     } bind HttpClient::class
-    single { ObservabilityService(get<IMeliLogger>(), get<HttpClient>()) } bind IObservabilityService::class
+    singleOf( ::ObservabilityService) bind IObservabilityService::class
 
     // Repositories
-    single { IncidentTrackerRepositoryImpl(get(), get(), get()) } bind IncidentTrackerRepository::class
-    single { ScreenRepositoryImpl(get(), get(), get()) } bind ScreenRepository::class
+    singleOf(::IncidentTrackerRepositoryImpl) bind IncidentTrackerRepository::class
+    singleOf(::ScreenRepositoryImpl) bind ScreenRepository::class
 }
