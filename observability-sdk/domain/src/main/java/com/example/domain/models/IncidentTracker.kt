@@ -15,5 +15,6 @@ data class IncidentTracker(
   val severity: EIncidentSeverity,
   val pkScreen: String,
   val isSync: Boolean = false,
+  val timestamp: Long,
   val metadata: List<Metadata>
 )
