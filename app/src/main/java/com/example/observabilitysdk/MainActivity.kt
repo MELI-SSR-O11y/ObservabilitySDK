@@ -69,8 +69,8 @@ fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewM
                     IncidentTracker(
                         errorCode = 500,
                         message = "Servidor",
-                        severity = com.example.domain.util.EIncidentSeverity.INFO,
-                        pkScreen = "6c23c66d-8e36-46e9-b66d-bdfccdfe594f",
+                        severity = com.example.domain.util.EIncidentSeverity.DEBUG,
+                        pkScreen = "fb852b03-47d6-431b-86e6-5eebefe98aa7",
                         metadata = listOf(
                             com.example.domain.models.Metadata(
                                 key = "key", value = "value"

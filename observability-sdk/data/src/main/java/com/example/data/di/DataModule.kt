@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.example.data.database.MeliDatabase
 import com.example.data.database.migrations.MIGRATION_1_2
+import com.example.data.database.migrations.MIGRATION_2_3
 import com.example.data.logger.MeliLogger
 import com.example.data.networking.HttpClientFactory
 import com.example.data.repository.IncidentTrackerRepositoryImpl
@@ -27,7 +28,7 @@ val dataModule = module(createdAtStart = true) {
     single<MeliDatabase> {
         Room.databaseBuilder(
             androidContext(), MeliDatabase::class.java, "MELI_Observability.db"
-        ).addMigrations(MIGRATION_1_2).setDriver(BundledSQLiteDriver()).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).setDriver(BundledSQLiteDriver()).build()
     }
 
     // DAOs

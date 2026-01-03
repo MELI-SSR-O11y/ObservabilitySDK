@@ -11,7 +11,7 @@ import com.example.data.database.entities.ScreenEntity
 
 @Database(
   entities = [ScreenEntity::class, IncidentTrackerEntity::class, MetadataEntity::class], 
-  version = 2
+  version = 3
 )
 abstract class MeliDatabase: RoomDatabase() {
 
