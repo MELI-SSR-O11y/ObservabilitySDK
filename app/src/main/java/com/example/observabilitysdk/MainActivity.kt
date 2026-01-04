@@ -84,6 +84,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             LinearProgressIndicator(modifier = Modifier.height(4.dp).fillMaxWidth())
         }
 
+        // Filter Section (Adaptive)
         if (isLandscape) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterDropDown(
@@ -96,7 +97,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 )
                 FilterDropDown(
                     label = "Severity",
-                    items = EIncidentSeverity.entries,
+                    items = EIncidentSeverity.entries.toList(),
                     selectedItem = state.activeFilter.severity,
                     onItemSelected = { onEvent(MainActions.FilterBySeverity(it)) },
                     itemToString = { it.name },
@@ -123,7 +124,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 )
                 FilterDropDown(
                     label = "Severity",
-                    items = EIncidentSeverity.entries,
+                    items = EIncidentSeverity.entries.toList(),
                     selectedItem = state.activeFilter.severity,
                     onItemSelected = { onEvent(MainActions.FilterBySeverity(it)) },
                     itemToString = { it.name },
@@ -146,6 +147,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
         Text(text = "Incidents: ${state.incidentsQuantity}")
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Charts Section (Adaptive)
         if (isLandscape) {
             Row(Modifier.fillMaxWidth().height(300.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Box(modifier = Modifier.weight(1f)) { SeverityPieChart(state) }
@@ -253,23 +255,37 @@ private fun LegendItem(label: String, color: Color, modifier: Modifier = Modifie
 
 @Composable
 private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modifier) {
-    val allIncidents = state.screens.flatMap { it.incidentTrackers }
+    val filter = state.activeFilter
+    val incidentsToDisplay = state.screens
+        // Apply screen filter first if a screen is selected
+        .filter { screen -> filter.screenId == null || screen.id == filter.screenId }
+        // Flatten to a list of all incidents from the filtered screens
+        .flatMap { it.incidentTrackers }
+        // Then, filter these incidents by severity and time
+        .filter { incident ->
+            val severityMatch = filter.severity == null || incident.severity == filter.severity
+            val timeLimit = filter.timeFilter.durationMillis.takeIf { it > 0 }?.let {
+                System.currentTimeMillis() - it
+            }
+            val timeMatch = timeLimit == null || incident.timestamp >= timeLimit
+            severityMatch && timeMatch
+        }
 
-    if (allIncidents.size < 2) {
-        Text("Not enough data for time series chart.", modifier = modifier.padding(vertical = 32.dp))
+    if (incidentsToDisplay.size < 2) {
+        Text("Not enough data for time series chart with current filters.", modifier = modifier.padding(vertical = 32.dp))
         return
     }
 
-    val timestamps = allIncidents.map { it.timestamp }
+    val timestamps = incidentsToDisplay.map { it.timestamp }
     val minTimestamp = timestamps.minOrNull() ?: return
     val maxTimestamp = timestamps.maxOrNull() ?: return
     val duration = Duration.ofMillis(maxTimestamp - minTimestamp)
 
     val (formatter, incidentsByTime) = when {
-        duration.toMinutes() < 120 -> DateTimeFormatter.ofPattern("HH:mm") to allIncidents.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.MINUTES) }.mapValues { it.value.size }.toSortedMap()
-        duration.toHours() < 48 -> DateTimeFormatter.ofPattern("d HH:00") to allIncidents.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.HOURS) }.mapValues { it.value.size }.toSortedMap()
-        duration.toDays() < 60 -> DateTimeFormatter.ofPattern("MMM d") to allIncidents.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate() }.mapValues { it.value.size }.toSortedMap()
-        else -> DateTimeFormatter.ofPattern("MMM yyyy") to allIncidents.groupBy { YearMonth.from(Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()) }.mapValues { it.value.size }.toSortedMap()
+        duration.toMinutes() < 120 -> DateTimeFormatter.ofPattern("HH:mm") to incidentsToDisplay.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.MINUTES) }.mapValues { it.value.size }.toSortedMap()
+        duration.toHours() < 48 -> DateTimeFormatter.ofPattern("d / HH:00") to incidentsToDisplay.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.HOURS) }.mapValues { it.value.size }.toSortedMap()
+        duration.toDays() < 60 -> DateTimeFormatter.ofPattern("MMM d") to incidentsToDisplay.groupBy { Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate() }.mapValues { it.value.size }.toSortedMap()
+        else -> DateTimeFormatter.ofPattern("MMM yyyy") to incidentsToDisplay.groupBy { YearMonth.from(Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()) }.mapValues { it.value.size }.toSortedMap()
     }
 
     if (incidentsByTime.size < 2) {
@@ -288,6 +304,7 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            // Y-Axis Labels
             Column(
                 modifier = Modifier.width(yAxisLabelWidth).fillMaxHeight(),
                 horizontalAlignment = Alignment.End,
@@ -297,15 +314,19 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
                 Text("0", style = MaterialTheme.typography.bodySmall)
             }
 
+            // Chart Canvas
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val chartWidth = size.width
                 val chartHeight = size.height
+
+                // Draw X and Y axes
                 drawLine(color = axisColor, start = Offset(0f, chartHeight), end = Offset(chartWidth, chartHeight), strokeWidth = 2f)
                 drawLine(color = axisColor, start = Offset(0f, 0f), end = Offset(0f, chartHeight), strokeWidth = 2f)
 
                 val xStep = if (dataPoints.size > 1) chartWidth / (dataPoints.size - 1) else 0f
                 val yRatio = if (maxIncidents > 0) chartHeight / maxIncidents else 0f
 
+                // Draw the line and points
                 for (i in 0 until dataPoints.size - 1) {
                     val p1 = dataPoints[i]
                     val p2 = dataPoints[i + 1]
@@ -323,6 +344,7 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
             }
         }
 
+        // X-Axis Labels
         Row(
             modifier = Modifier.fillMaxWidth().padding(start = yAxisLabelWidth),
             horizontalArrangement = Arrangement.SpaceBetween
