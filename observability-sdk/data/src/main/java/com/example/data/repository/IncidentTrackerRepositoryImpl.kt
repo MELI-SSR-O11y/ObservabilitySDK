@@ -24,7 +24,7 @@ class IncidentTrackerRepositoryImpl(
     val screenId = screenDao.getIdByName(screenName)
     if (screenId == null) return
     val incidentEntity = incidentTracker.toEntity()
-    incidentDao.create(incidentEntity)
+    incidentDao.create(incidentEntity.copy(pkScreen = screenId))
     incidentTracker.metadata.forEach { metadata ->
       metadataDao.create(metadata.toEntity(incidentEntity.id))
     }

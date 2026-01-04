@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class ContractViewModel(
+class ContractViewModel(
     private val insertIncidentTrackerUseCase: InsertIncidentTrackerUseCase,
     private val insertScreenUseCase: InsertScreenUseCase,
     private val syncToRemoteUseCase: SyncToRemoteUseCase,
@@ -74,10 +74,6 @@ internal class ContractViewModel(
             is MainActions.FilterByScreen -> _filter.update { it.copy(screenId = event.screenId) }
             is MainActions.FilterBySeverity -> _filter.update { it.copy(severity = event.severity) }
             is MainActions.FilterByTime -> _filter.update { it.copy(timeFilter = event.timeFilter) }
-        }
-        viewModelScope.launch {
-            delay(1000)
-            _internalState.update { it.copy(isLoading = false) }
         }
     }
 
