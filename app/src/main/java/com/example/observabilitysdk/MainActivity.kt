@@ -1,5 +1,6 @@
 package com.example.observabilitysdk
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.domain.models.IncidentTracker
@@ -69,6 +71,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val sdk: ContractViewModel = koinViewModel()
     val state by sdk.state.collectAsStateWithLifecycle()
     val onEvent = sdk::onEvent
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Column(
         modifier = modifier
@@ -80,38 +84,61 @@ fun MainScreen(modifier: Modifier = Modifier) {
             LinearProgressIndicator(modifier = Modifier.height(4.dp).fillMaxWidth())
         }
 
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (isLandscape) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterDropDown(
+                    label = "Screen",
+                    items = state.screens,
+                    selectedItem = state.screens.find { it.id == state.activeFilter.screenId },
+                    onItemSelected = { onEvent(MainActions.FilterByScreen(it?.id)) },
+                    itemToString = { it.name },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterDropDown(
+                    label = "Severity",
+                    items = EIncidentSeverity.entries,
+                    selectedItem = state.activeFilter.severity,
+                    onItemSelected = { onEvent(MainActions.FilterBySeverity(it)) },
+                    itemToString = { it.name },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterDropDown(
+                    label = "Time",
+                    items = TimeFilter.allFilters(),
+                    selectedItem = state.activeFilter.timeFilter,
+                    onItemSelected = { onEvent(MainActions.FilterByTime(it ?: TimeFilter.None)) },
+                    itemToString = { it.displayName },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterDropDown(
+                    label = "Screen",
+                    items = state.screens,
+                    selectedItem = state.screens.find { it.id == state.activeFilter.screenId },
+                    onItemSelected = { onEvent(MainActions.FilterByScreen(it?.id)) },
+                    itemToString = { it.name },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterDropDown(
+                    label = "Severity",
+                    items = EIncidentSeverity.entries,
+                    selectedItem = state.activeFilter.severity,
+                    onItemSelected = { onEvent(MainActions.FilterBySeverity(it)) },
+                    itemToString = { it.name },
+                    modifier = Modifier.weight(1f)
+                )
+            }
             FilterDropDown(
-                label = "Screen",
-                items = state.screens,
-                selectedItem = state.screens.find { it.id == state.activeFilter.screenId },
-                onItemSelected = {
-                    onEvent(MainActions.FilterByScreen(it?.id))
-                },
-                itemToString = { it.name },
-                modifier = Modifier.weight(1f)
-            )
-            FilterDropDown(
-                label = "Severity",
-                items = EIncidentSeverity.entries,
-                selectedItem = state.activeFilter.severity,
-                onItemSelected = {
-                    onEvent(MainActions.FilterBySeverity(it))
-                },
-                itemToString = { it.name },
-                modifier = Modifier.weight(1f)
+                label = "Time",
+                items = TimeFilter.allFilters(),
+                selectedItem = state.activeFilter.timeFilter,
+                onItemSelected = { onEvent(MainActions.FilterByTime(it ?: TimeFilter.None)) },
+                itemToString = { it.displayName },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             )
         }
-        FilterDropDown(
-            label = "Time",
-            items = TimeFilter.allFilters(),
-            selectedItem = state.activeFilter.timeFilter,
-            onItemSelected = {
-                onEvent(MainActions.FilterByTime(it ?: TimeFilter.None))
-            },
-            itemToString = { it.displayName },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -119,13 +146,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
         Text(text = "Incidents: ${state.incidentsQuantity}")
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Gráfica de Torta
-        SeverityPieChart(state)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Gráfica de Tiempo
-        IncidentTimeSeriesChart(state)
+        if (isLandscape) {
+            Row(Modifier.fillMaxWidth().height(300.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Box(modifier = Modifier.weight(1f)) { SeverityPieChart(state) }
+                Box(modifier = Modifier.weight(1f)) { IncidentTimeSeriesChart(state) }
+            }
+        } else {
+            SeverityPieChart(state)
+            Spacer(modifier = Modifier.height(24.dp))
+            IncidentTimeSeriesChart(state)
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -138,14 +168,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     IncidentTracker(
                         errorCode = 500,
                         message = "Servidor",
-                        severity = com.example.domain.util.EIncidentSeverity.ERROR,
-                        pkScreen = "fb852b03-47d6-431b-86e6-5eebefe98aa7",
+                        severity = EIncidentSeverity.DEBUG,
+                        pkScreen = "081b05e6-7709-40b8-bbed-7b05958f6432",
                         timestamp = System.currentTimeMillis(),
-                        metadata = listOf(
-                            com.example.domain.models.Metadata(
-                                key = "key", value = "value"
-                            )
-                        )
+                        metadata = listOf(com.example.domain.models.Metadata(key = "key", value = "value"))
                     ), "Pantalla 2"
                 )
             )
@@ -262,7 +288,6 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-            // Y-Axis Labels
             Column(
                 modifier = Modifier.width(yAxisLabelWidth).fillMaxHeight(),
                 horizontalAlignment = Alignment.End,
@@ -272,19 +297,15 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
                 Text("0", style = MaterialTheme.typography.bodySmall)
             }
 
-            // Chart Canvas
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val chartWidth = size.width
                 val chartHeight = size.height
-
-                // Draw X and Y axes
                 drawLine(color = axisColor, start = Offset(0f, chartHeight), end = Offset(chartWidth, chartHeight), strokeWidth = 2f)
                 drawLine(color = axisColor, start = Offset(0f, 0f), end = Offset(0f, chartHeight), strokeWidth = 2f)
 
-                val xStep = chartWidth / (dataPoints.size - 1)
+                val xStep = if (dataPoints.size > 1) chartWidth / (dataPoints.size - 1) else 0f
                 val yRatio = if (maxIncidents > 0) chartHeight / maxIncidents else 0f
 
-                // Draw the line and points
                 for (i in 0 until dataPoints.size - 1) {
                     val p1 = dataPoints[i]
                     val p2 = dataPoints[i + 1]
@@ -302,7 +323,6 @@ private fun IncidentTimeSeriesChart(state: MainState, modifier: Modifier = Modif
             }
         }
 
-        // X-Axis Labels
         Row(
             modifier = Modifier.fillMaxWidth().padding(start = yAxisLabelWidth),
             horizontalArrangement = Arrangement.SpaceBetween
