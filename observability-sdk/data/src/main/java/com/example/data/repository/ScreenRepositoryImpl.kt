@@ -59,7 +59,7 @@ class ScreenRepositoryImpl(
             val timeFilter = if(filter.timeFilter is TimeFilter.None) {
               0
             } else {
-              System.currentTimeMillis() - filter.timeFilter.durationMinutes
+              System.currentTimeMillis() - filter.timeFilter.durationMillis
             }
             incident.incident.timestamp >= timeFilter
                     && (filter.severity == null

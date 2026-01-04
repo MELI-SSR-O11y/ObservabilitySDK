@@ -33,8 +33,9 @@ class ContractViewModel(
     override val state: StateFlow<MainState> = combine(
         getAllScreensUseCase(),
         filterUseCase(_filter.value),
-        _internalState
-    ) { screen, filterScreens, internalState ->
+        _internalState,
+        _filter
+    ) { screen, filterScreens, internalState, filter ->
         val allIncidents = filterScreens.flatMap { it.incidentTrackers }
         internalState.copy(
             screens = screen,
@@ -47,6 +48,7 @@ class ContractViewModel(
             errorSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.ERROR },
             criticalSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.CRITICAL },
             isSync = !(screen.any { !it.isSync } || allIncidents.any { !it.isSync } || allIncidents.any { it.metadata.any { meta -> !meta.isSync }}),
+            activeFilter = filter
         )
     }.catch { throwable ->
         emit(_internalState.value.copy(error = throwable.message, isLoading = false))

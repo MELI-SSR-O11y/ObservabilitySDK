@@ -35,6 +35,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.domain.models.IncidentTracker
+import com.example.domain.models.TimeFilter
+import com.example.domain.util.EIncidentSeverity
+import com.example.observabilitysdk.ui.FilterDropDown
 import com.example.observabilitysdk.ui.theme.ObservabilitySDKTheme
 import com.example.presentation.main.ContractViewModel
 import com.example.presentation.main.MainActions
@@ -62,7 +65,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewModel()) {
+fun MainScreen(modifier: Modifier = Modifier) {
+    val sdk: ContractViewModel = koinViewModel()
     val state by sdk.state.collectAsStateWithLifecycle()
     val onEvent = sdk::onEvent
 
@@ -75,6 +79,42 @@ fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewM
         if (state.isLoading) {
             LinearProgressIndicator(modifier = Modifier.height(4.dp).fillMaxWidth())
         }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterDropDown(
+                label = "Screen",
+                items = state.screens,
+                selectedItem = state.screens.find { it.id == state.activeFilter.screenId },
+                onItemSelected = {
+                    onEvent(MainActions.FilterByScreen(it?.id))
+                },
+                itemToString = { it.name },
+                modifier = Modifier.weight(1f)
+            )
+            FilterDropDown(
+                label = "Severity",
+                items = EIncidentSeverity.entries,
+                selectedItem = state.activeFilter.severity,
+                onItemSelected = {
+                    onEvent(MainActions.FilterBySeverity(it))
+                },
+                itemToString = { it.name },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        FilterDropDown(
+            label = "Time",
+            items = TimeFilter.allFilters(),
+            selectedItem = state.activeFilter.timeFilter,
+            onItemSelected = {
+                onEvent(MainActions.FilterByTime(it ?: TimeFilter.None))
+            },
+            itemToString = { it.displayName },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(text = "Screens: ${state.screensQuantity}")
         Text(text = "Incidents: ${state.incidentsQuantity}")
         Spacer(modifier = Modifier.height(16.dp))

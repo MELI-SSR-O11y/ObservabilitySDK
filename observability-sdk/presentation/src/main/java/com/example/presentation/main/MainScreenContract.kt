@@ -1,5 +1,6 @@
 package com.example.presentation.main
 
+import com.example.domain.models.IncidentFilter
 import com.example.domain.models.IncidentTracker
 import com.example.domain.models.Screen
 import com.example.domain.models.TimeFilter
@@ -19,7 +20,8 @@ data class MainState(
     val infoSeverityQuantity: Int = 0,
     val warningSeverityQuantity: Int = 0,
     val errorSeverityQuantity: Int = 0,
-    val criticalSeverityQuantity: Int = 0
+    val criticalSeverityQuantity: Int = 0,
+    val activeFilter: IncidentFilter = IncidentFilter()
 )
 
 /**
@@ -28,7 +30,7 @@ data class MainState(
 sealed class MainActions {
     data class InsertScreen(val name : String): MainActions()
     data class InsertIncident(val incident : IncidentTracker, val screenName : String): MainActions()
-    data class FilterByScreen(val screenId : String): MainActions()
+    data class FilterByScreen(val screenId : String?): MainActions()
     data class FilterBySeverity(val severity : EIncidentSeverity?): MainActions()
     data class FilterByTime(val timeFilter : TimeFilter): MainActions()
     object SyncToRemote: MainActions()
