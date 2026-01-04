@@ -62,8 +62,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-    val sdk: ContractViewModel = koinViewModel()
+fun MainScreen(modifier: Modifier = Modifier, sdk: ContractViewModel = koinViewModel()) {
     val state by sdk.state.collectAsStateWithLifecycle()
     val onEvent = sdk::onEvent
 

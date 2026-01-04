@@ -62,7 +62,9 @@ class ContractViewModel(
             is MainActions.InsertScreen -> insertScreen(event.name)
             is MainActions.InsertIncident -> insertIncident(event.incident, event.screenName)
             is MainActions.SyncToRemote -> viewModelScope.launch { syncToRemoteUseCase()}
-            is MainActions.FilterData -> viewModelScope.launch { _filter.emit(event.filter) }
+            is MainActions.FilterByScreen -> _filter.update { it.copy(screenId = event.screenId) }
+            is MainActions.FilterBySeverity -> _filter.update { it.copy(severity = event.severity) }
+            is MainActions.FilterByTime -> _filter.update { it.copy(timeFilter = event.timeFilter) }
         }
         viewModelScope.launch {
             delay(1000)

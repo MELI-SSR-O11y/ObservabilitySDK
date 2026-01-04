@@ -1,8 +1,9 @@
 package com.example.presentation.main
 
-import com.example.domain.models.IncidentFilter
 import com.example.domain.models.IncidentTracker
 import com.example.domain.models.Screen
+import com.example.domain.models.TimeFilter
+import com.example.domain.util.EIncidentSeverity
 
 /**
  * Represents the state of the UI. It's a single source of truth for the view.
@@ -27,6 +28,8 @@ data class MainState(
 sealed class MainActions {
     data class InsertScreen(val name : String): MainActions()
     data class InsertIncident(val incident : IncidentTracker, val screenName : String): MainActions()
-    data class FilterData(val filter : IncidentFilter): MainActions()
+    data class FilterByScreen(val screenId : String): MainActions()
+    data class FilterBySeverity(val severity : EIncidentSeverity?): MainActions()
+    data class FilterByTime(val timeFilter : TimeFilter): MainActions()
     object SyncToRemote: MainActions()
 }
