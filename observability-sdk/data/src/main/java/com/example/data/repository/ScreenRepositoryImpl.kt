@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.example.data.repository
 
 import androidx.room.Transaction
@@ -10,12 +12,18 @@ import com.example.data.dtos.toMetadata
 import com.example.data.dtos.toScreen
 import com.example.domain.service.IObservabilityService
 import com.example.domain.logger.IMeliLogger
+import com.example.domain.models.IncidentFilter
 import com.example.domain.models.Screen
+import com.example.domain.models.TimeFilter
 import com.example.domain.repositories.ScreenRepository
+import com.example.domain.util.EIncidentSeverity
 import io.ktor.client.statement.HttpResponse
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class ScreenRepositoryImpl(
@@ -38,6 +46,34 @@ class ScreenRepositoryImpl(
       logger.info("ScreenRepositoryImpl::insertScreen -> Se envio la pantalla al servidor")
     }.onFailure {
       logger.warn("ScreenRepositoryImpl::insertScreen -> No se envio la pantalla al servidor")
+    }
+  }
+
+  override fun getScreensByFilter(filter: IncidentFilter) : Flow<List<Screen>> {
+    return screenDao.getScreensWithRelations().flatMapLatest { screensWithIncidents ->
+      val filterScreens: List<Screen> = screensWithIncidents.filter { screen ->
+        screen.screen.id == filter.screenId || filter.screenId == null
+      }.map { screenEntity ->
+        screenEntity.screen.toScreen(
+          incidentTrackers = screenEntity.incidents.filter { incident ->
+            val timeFilter = if(filter.timeFilter is TimeFilter.None) {
+              0
+            } else {
+              System.currentTimeMillis() - filter.timeFilter.durationMinutes
+            }
+            incident.incident.timestamp >= timeFilter
+                    && (filter.severity == null
+                    || EIncidentSeverity.valueOf(incident.incident.severity) == filter.severity)
+           }.map { incident ->
+             incident.incident.toIncidentTracker(
+               metadata = incident.metadata.map { metadataEntity -> metadataEntity.toMetadata() }
+             )
+          }
+        )
+      }
+      flow {
+        emit(filterScreens)
+      }
     }
   }
 

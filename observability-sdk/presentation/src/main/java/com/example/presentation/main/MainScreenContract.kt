@@ -1,5 +1,6 @@
 package com.example.presentation.main
 
+import com.example.domain.models.IncidentFilter
 import com.example.domain.models.IncidentTracker
 import com.example.domain.models.Screen
 
@@ -24,7 +25,8 @@ data class MainState(
  * Represents the events that the view can send to the ViewModel.
  */
 sealed class MainActions {
-    data class InsertScreen(val name: String) : MainActions()
-    data class InsertIncident(val incident: IncidentTracker, val screenName: String) : MainActions()
-    object SyncToRemote : MainActions()
+    data class InsertScreen(val name : String): MainActions()
+    data class InsertIncident(val incident : IncidentTracker, val screenName : String): MainActions()
+    data class FilterData(val filter : IncidentFilter): MainActions()
+    object SyncToRemote: MainActions()
 }

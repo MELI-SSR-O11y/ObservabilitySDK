@@ -2,6 +2,8 @@ package com.example.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.models.IncidentFilter
+import com.example.domain.usecases.FilterDataUseCase
 import com.example.domain.usecases.GetAllScreensUseCase
 import com.example.domain.usecases.InsertIncidentTrackerUseCase
 import com.example.domain.usecases.InsertScreenUseCase
@@ -18,30 +20,33 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ContractViewModel(
-    private val insertIncidentTrackerUseCase: InsertIncidentTrackerUseCase,
-    private val insertScreenUseCase: InsertScreenUseCase,
-    getAllScreensUseCase: GetAllScreensUseCase,
-    private val syncToRemoteUseCase: SyncToRemoteUseCase,
+    private val insertIncidentTrackerUseCase : InsertIncidentTrackerUseCase,
+    private val insertScreenUseCase : InsertScreenUseCase,
+    private val syncToRemoteUseCase : SyncToRemoteUseCase,
+    getAllScreensUseCase : GetAllScreensUseCase,
+    filterUseCase : FilterDataUseCase,
 ) : ViewModel(), ContractObservabilityApi {
 
     private val _internalState = MutableStateFlow(MainState())
+    private val _filter = MutableStateFlow(IncidentFilter())
 
     override val state: StateFlow<MainState> = combine(
         getAllScreensUseCase(),
+        filterUseCase(_filter.value),
         _internalState
-    ) { screens, internalState ->
-        val allIncidents = screens.flatMap { it.incidentTrackers }
+    ) { screen, filterScreens, internalState ->
+        val allIncidents = filterScreens.flatMap { it.incidentTrackers }
         internalState.copy(
-            screens = screens,
+            screens = screen,
             isLoading = _internalState.value.isLoading,
             incidentsQuantity = allIncidents.size,
-            screensQuantity = screens.size,
+            screensQuantity = screen.size,
             debugSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.DEBUG },
             infoSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.INFO },
             warningSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.WARNING },
             errorSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.ERROR },
             criticalSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.CRITICAL },
-            isSync = !(screens.any { !it.isSync } || allIncidents.any { !it.isSync } || allIncidents.any { it.metadata.any { meta -> !meta.isSync }}),
+            isSync = !(screen.any { !it.isSync } || allIncidents.any { !it.isSync } || allIncidents.any { it.metadata.any { meta -> !meta.isSync }}),
         )
     }.catch { throwable ->
         emit(_internalState.value.copy(error = throwable.message, isLoading = false))
@@ -57,6 +62,7 @@ class ContractViewModel(
             is MainActions.InsertScreen -> insertScreen(event.name)
             is MainActions.InsertIncident -> insertIncident(event.incident, event.screenName)
             is MainActions.SyncToRemote -> viewModelScope.launch { syncToRemoteUseCase()}
+            is MainActions.FilterData -> viewModelScope.launch { _filter.emit(event.filter) }
         }
         viewModelScope.launch {
             delay(1000)

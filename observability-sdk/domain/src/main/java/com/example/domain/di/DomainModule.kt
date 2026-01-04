@@ -1,5 +1,6 @@
 package com.example.domain.di
 
+import com.example.domain.usecases.FilterDataUseCase
 import com.example.domain.usecases.GetAllScreensUseCase
 import com.example.domain.usecases.InsertIncidentTrackerUseCase
 import com.example.domain.usecases.InsertScreenUseCase
@@ -13,5 +14,6 @@ val domainModule = module {
     singleOf(::InsertScreenUseCase)
     singleOf(::GetAllScreensUseCase)
     singleOf(::SyncToRemoteUseCase)
+    singleOf(::FilterDataUseCase)
 
 }
