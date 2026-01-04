@@ -23,12 +23,12 @@ class IncidentTrackerRepositoryImpl(
     logger.debug("IncidentTrackerRepositoryImpl::insertIncidentTracker::Init")
     val screenId = screenDao.getIdByName(screenName)
     if (screenId == null) return
-    val incidentEntity = incidentTracker.toEntity()
-    incidentDao.create(incidentEntity.copy(pkScreen = screenId))
+    val incidentEntity = incidentTracker.toEntity(screenId)
+    incidentDao.create(incidentEntity)
     incidentTracker.metadata.forEach { metadata ->
       metadataDao.create(metadata.toEntity(incidentEntity.id))
     }
-    api.addIncidentTrack<HttpResponse>(incidentTracker).onSuccess {
+    api.addIncidentTrack<HttpResponse>(incidentTracker.copy(screenId = screenId)).onSuccess {
       incidentDao.upsert(incidentEntity.copy(isSync = true))
       incidentTracker.metadata.forEach { metadata ->
         metadataDao.upsert(metadata.toEntity(incidentEntity.id).copy(isSync = true))

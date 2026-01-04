@@ -11,20 +11,20 @@ fun IncidentTrackerEntity.toIncidentTracker(metadata: List<Metadata>): IncidentT
         errorCode = this.errorCode,
         message = this.message,
         severity = EIncidentSeverity.valueOf(this.severity),
-        pkScreen = this.pkScreen,
+        screenId = this.pkScreen,
         metadata = metadata,
         isSync = this.isSync,
         timestamp = this.timestamp
     )
 }
 
-fun IncidentTracker.toEntity(): IncidentTrackerEntity {
+fun IncidentTracker.toEntity(screenId: String? = null): IncidentTrackerEntity {
     return IncidentTrackerEntity(
         id = this.id,
         errorCode = this.errorCode,
         message = this.message,
         severity = this.severity.name,
-        pkScreen = this.pkScreen,
+        pkScreen = screenId ?: this.screenId,
         isSync = false,
         timestamp = this.timestamp
     )

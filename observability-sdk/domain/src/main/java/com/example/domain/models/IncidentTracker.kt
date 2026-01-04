@@ -13,7 +13,7 @@ data class IncidentTracker(
   val errorCode: Int,
   val message: String,
   val severity: EIncidentSeverity,
-  val pkScreen: String,
+  val screenId: String,
   val isSync: Boolean = false,
   val timestamp: Long,
   val metadata: List<Metadata>
