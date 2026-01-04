@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ContractViewModel(
+internal class ContractViewModel(
     private val insertIncidentTrackerUseCase: InsertIncidentTrackerUseCase,
     private val insertScreenUseCase: InsertScreenUseCase,
     private val syncToRemoteUseCase: SyncToRemoteUseCase,
