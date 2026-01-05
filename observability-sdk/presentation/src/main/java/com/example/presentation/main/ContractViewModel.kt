@@ -44,7 +44,7 @@ class ContractViewModel(
                 val allIncidents = filteredScreens.flatMap { it.incidentTrackers }
                 internalState.copy(
                     screens = allScreens,
-                    isLoading = internalState.isLoading,
+                    isLoading = false,
                     incidentsQuantity = allIncidents.size,
                     screensQuantity = allScreens.size,
                     debugSeverityQuantity = allIncidents.count { it.severity == EIncidentSeverity.DEBUG },

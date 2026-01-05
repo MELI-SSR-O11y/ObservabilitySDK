@@ -11,7 +11,7 @@ import com.example.domain.util.EIncidentSeverity
  */
 data class MainState(
     val screens: List<Screen> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val error: String? = null,
     val isSync: Boolean = false,
     val screensQuantity: Int = 0,
