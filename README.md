@@ -8,7 +8,7 @@ Este proyecto es un SDK de observabilidad para Android, diseñado con una arquit
 - **Inyección de Dependencias**: Configurado con Koin para un manejo desacoplado y eficiente de las dependencias, incluyendo optimizaciones de rendimiento.
 - **Persistencia Local**: Utiliza Room para almacenar datos de pantallas e incidentes, con migraciones para gestionar cambios de esquema de forma segura.
 - **API Pública Encapsulada**: Expone una única interfaz (`ContractObservabilityApi`) para interactuar con el SDK, ocultando todos los detalles de implementación (`ViewModel`, `UseCases`, etc.) y siguiendo el patrón de diseño de Contrato.
-- **Provisión de Datos para Visualización**: El SDK procesa y expone un `StateFlow` (`MainState`) que contiene todas las métricas necesarias (como contadores de incidentes por severidad) para que una aplicación cliente pueda construir fácilmente visualizaciones ricas, como gráficos de torta o de series de tiempo. El módulo `/app` sirve como una implementación de referencia.
+- **Provisión de Datos para Visualización**: El SDK procesa y expone un `StateFlow` (`MainState`) que contiene todas las métricas necesarias (como contadores de incidentes por severidad) para que una aplicación cliente pueda construir fácilmente visualizaciones ricas. El módulo `/app` sirve como una implementación de referencia.
 - **Filtrado Dinámico**: La API permite enviar acciones para filtrar los datos por pantalla, severidad del incidente y múltiples rangos de tiempo (`TimeFilter`).
 - **Pruebas Unitarias**: Cobertura de pruebas para la capa de `domain` (`UseCases`) usando `MockK` para asegurar la fiabilidad de la lógica de negocio.
 - **Automatización de Builds**: Tareas de Gradle personalizadas para automatizar la limpieza, prueba y compilación de la librería.
@@ -26,14 +26,17 @@ Este proyecto es un SDK de observabilidad para Android, diseñado con una arquit
 
 El proyecto está configurado con tareas personalizadas de Gradle para optimizar el flujo de desarrollo y asegurar la calidad del código.
 
-### Tareas Personalizadas
+### Tarea `buildDevAars`
 
-Se han creado las siguientes tareas en el archivo `build.gradle.kts` raíz:
+La tarea principal de integración continua es `buildDevAars`. Esta se encarga de ejecutar las pruebas unitarias y, si tienen éxito, ensamblar los artefactos `.aar` para cada módulo de la librería.
 
-1.  **`cleanBuilds`**: Una tarea de utilidad que limpia los directorios de compilación de los tres módulos del SDK (`presentation`, `domain`, `data`).
-2.  **`buildDevAars`**: La tarea principal de integración continua. Ejecuta las pruebas unitarias de los tres módulos y, solo si todas pasan, procede a ensamblar los artefactos `.aar` de la variante `dev`.
+#### Productos Generados
 
-El orden de ejecución está garantizado con la regla `mustRunAfter`, lo que significa que el ensamblaje no comenzará si una prueba falla.
+Al ejecutar esta tarea, se generarán tres artefactos, uno por cada módulo del SDK, en las siguientes rutas:
+
+- **Data**: `:observability-sdk/data/build/outputs/aar/data-dev.aar`
+- **Domain**: `:observability-sdk/domain/build/outputs/aar/domain-dev.aar`
+- **Presentation**: `:observability-sdk:presentation/build/outputs/aar/presentation-dev.aar`
 
 ### Cómo Ejecutar las Tareas
 
@@ -53,32 +56,51 @@ También puedes ejecutar estas tareas directamente desde el IDE:
 2.  Navega a **`ObservabilitySDK` > `Tasks` > `Build`**.
 3.  Aquí encontrarás las tareas `buildDevAars` y `cleanBuilds`. Haz doble clic en cualquiera de ellas para ejecutarla.
 
-## 🛠️ Cómo Usar el SDK (Ejemplo en la App)
+## 🛠️ Cómo Usar el SDK
 
-La interacción con el SDK desde una aplicación cliente se realiza a través del contrato `ContractObservabilityApi`.
+La integración del SDK en una aplicación cliente se realiza a través de Koin y la API pública `ContractObservabilityApi`.
 
-1. **Inyectar la API del SDK**:
-   Usa Koin para obtener una instancia del contrato en tu Composable.
+### 1. Inyección de Módulos Koin
 
-   ```kotlin
-   val sdk: ContractObservabilityApi = koinViewModel()
-   ```
+Cada módulo del SDK (`data`, `domain`, `presentation`) expone su propio módulo de Koin (`dataModule`, `domainModule`, `presentationModule`). La aplicación cliente es responsable de iniciar Koin y cargar estos módulos.
 
-2. **Observar el Estado**:
-   Recolecta el `state` para que tu UI reaccione a los cambios y el onEvent para enviar acciones.
+En la app de ejemplo, esto se realiza en la clase `MainApplication.kt`:
 
-   ```kotlin
-   val state by sdk.state.collectAsStateWithLifecycle()
-   val onEvent = api::onEvent
-   ```
+```kotlin
+class MainApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
 
-3. **Enviar Eventos (Acciones)**:
-   Usa la función `onEvent` para enviar acciones al SDK.
+        startKoin {
+            androidContext(this@MainApplication)
+            modules(
+                dataModule,
+                domainModule,
+                presentationModule
+            )
+        }
+    }
+}
+```
 
-   ```kotlin
-   onEvent(MainActions.RollbackFromRemote)
-   onEvent(MainActions.FilterByTime(TimeFilter.Last30Minutes))
-   ```
+### 2. Interacción con la API del SDK
+
+Una vez que Koin está configurado, la UI de la aplicación cliente puede solicitar una instancia de `ContractObservabilityApi` y comenzar a interactuar con ella.
+
+- **Inyectar la API**:
+  ```kotlin
+  val sdk: ContractObservabilityApi = koinViewModel()
+  ```
+
+- **Observar el Estado**:
+  ```kotlin
+  val state by sdk.state.collectAsStateWithLifecycle()
+  ```
+
+- **Enviar Eventos**:
+  ```kotlin
+  sdk.onEvent(MainActions.InsertScreen("LoginScreen"))
+  ```
 
 ## 💻 Pila Tecnológica
 
