@@ -28,6 +28,7 @@ tasks.register("buildDevAars") {
   description = "Ensambla los AARs de la variante 'dev' para los módulos de la librería."
 
   dependsOn(
+    ":observability-sdk:domain:testDevUnitTest",
     ":observability-sdk:presentation:assembleDev",
     ":observability-sdk:domain:assembleDev",
     ":observability-sdk:data:assembleDev",
