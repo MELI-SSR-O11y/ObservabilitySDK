@@ -16,9 +16,13 @@ room = "2.7.2"
 sqlite = "2.5.2"
 koin = "4.1.0"
 kotzilla = "1.4.2"
+mockk = "1.14.7"
+coroutines = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+android-mock = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+koitlinx-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines"}
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

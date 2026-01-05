@@ -1,6 +1,6 @@
 plugins {
-  id("observability.android.library")
-  alias(libs.plugins.kotlin.android)
+    id("observability.android.library")
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -8,4 +8,8 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.junit)
+    testImplementation(libs.android.mock)
+    testImplementation(libs.koitlinx.coroutine.test)
+    testImplementation(kotlin("test"))
 }
