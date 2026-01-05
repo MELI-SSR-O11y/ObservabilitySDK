@@ -61,9 +61,9 @@ La integración del SDK en una aplicación cliente se realiza a través de Koin 
 
 ### 1. Inyección de Módulos Koin
 
-Cada módulo del SDK (`data`, `domain`, `presentation`) expone su propio módulo de Koin (`dataModule`, `domainModule`, `presentationModule`). La aplicación cliente es responsable de iniciar Koin y cargar estos módulos.
+Cada módulo del SDK (`data`, `domain`, `presentation`) expone su propio módulo de Koin. La aplicación cliente es responsable de iniciar Koin y cargar estos módulos. Esto se hace en una clase `Application` personalizada.
 
-En la app de ejemplo, esto se realiza en la clase `MainApplication.kt`:
+**Paso 1: Crear la clase `Application`**
 
 ```kotlin
 class MainApplication : Application() {
@@ -81,6 +81,22 @@ class MainApplication : Application() {
     }
 }
 ```
+
+**Paso 2: Registrar la clase en el `AndroidManifest.xml`**
+
+Es crucial registrar esta clase en el manifiesto de la aplicación cliente. Añade el atributo `android:name` a la etiqueta `<application>`. Además, si tu servidor de pruebas no usa HTTPS, debes permitir el tráfico de texto plano:
+
+```xml
+<application
+    android:name=".MainApplication"
+    android:usesCleartextTraffic="true"
+    ...
+    >
+    <!-- ... el resto de tu manifiesto ... -->
+</application>
+```
+
+**Nota Importante**: El atributo `android:usesCleartextTraffic="true"` es necesario durante el desarrollo ya que el servidor backend local no usa HTTPS. Permite que la aplicación realice peticiones HTTP.
 
 ### 2. Interacción con la API del SDK
 
