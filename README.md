@@ -165,3 +165,19 @@ Una vez que Koin está configurado, la UI de la aplicación cliente puede solici
 - **Red**: Ktor
 - **Pruebas**: JUnit 4, MockK
 - **Automatización y Compilación**: Gradle
+
+## 🚀 Próximos Pasos y Mejoras Futuras*
+*
+Si se dispusiera de más tiempo, las siguientes mejoras podrían llevar el SDK al siguiente nivel:
+
+- **Sistema de Reconocimiento de Dispositivo**: Implementar un sistema que capture el tipo de dispositivo, versión de Android y sus capacidades. Esto permitiría una clasificación más precisa de las fallas para identificar si están correlacionadas con versiones específicas del SO o limitaciones de hardware.
+
+- **Reportes Automáticos por Crash**: Automatizar la generación de reportes de incidentes. Por ejemplo, si la aplicación crashea al consumir un servicio, el SDK debería interceptar el fallo y generar un reporte de incidente automáticamente antes de que la app se cierre.
+
+- **Integración con Firebase Crashlytics**: Conectar el SDK con un servicio de monitoreo líder en la industria como Firebase Crashlytics. Esto proporcionaría un dashboard centralizado para el registro y análisis de fallos en producción.
+
+- **Monitoreo de Fugas de Memoria**: Integrar una librería como **LeakCanary** para monitorear en tiempo real las fugas de memoria durante el desarrollo, asegurando una mayor estabilidad de la aplicación.
+
+- **Análisis de Calidad y Seguridad del Código**: Implementar una herramienta de análisis estático en tiempo real como **SonarQube** o **Datadog**. Esto ayudaría a mantener un alto estándar de calidad de código, identificar vulnerabilidades de seguridad y optimizar el rendimiento de forma proactiva.
+
+- **Optimización de Consultas a la Base de Datos**: A nivel de proyecto, delegar la lógica de filtrado de datos directamente a la base de datos (mediante queries en el DAO) en lugar de hacerlo en la capa de repositorio con lambdas. Aunque la implementación actual demuestra el manejo de colecciones y uso de funciones lambda en Kotlin, mover esta lógica a Room mejoraría significativamente el rendimiento de la aplicación al reducir la cantidad de datos procesados en memoria.
