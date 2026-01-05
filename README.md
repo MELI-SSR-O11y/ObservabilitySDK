@@ -8,14 +8,13 @@ Este proyecto es un SDK de observabilidad para Android, diseñado con una arquit
 - **Inyección de Dependencias**: Configurado con Koin para un manejo desacoplado y eficiente de las dependencias, incluyendo optimizaciones de rendimiento.
 - **Persistencia Local**: Utiliza Room para almacenar datos de pantallas e incidentes, con migraciones para gestionar cambios de esquema de forma segura.
 - **API Pública Encapsulada**: Expone una única interfaz (`ContractObservabilityApi`) para interactuar con el SDK, ocultando todos los detalles de implementación (`ViewModel`, `UseCases`, etc.) y siguiendo el patrón de diseño de Contrato.
-- **Provisión de Datos para Visualización**: El SDK procesa y expone un `StateFlow` (`MainState`) que contiene todas las métricas necesarias (como contadores de incidentes por severidad) para que una aplicación cliente pueda construir fácilmente visualizaciones ricas. El módulo `/app` sirve como una implementación de referencia.
+- **Provisión de Datos para Visualización**: El SDK procesa y expone un `StateFlow` (`MainState`) que contiene todas las métricas necesarias (como contadores de incidentes por severidad) para que una aplicación cliente pueda construir fácilmente visualizaciones ricas.
 - **Filtrado Dinámico**: La API permite enviar acciones para filtrar los datos por pantalla, severidad del incidente y múltiples rangos de tiempo (`TimeFilter`).
 - **Pruebas Unitarias**: Cobertura de pruebas para la capa de `domain` (`UseCases`) usando `MockK` para asegurar la fiabilidad de la lógica de negocio.
 - **Automatización de Builds**: Tareas de Gradle personalizadas para automatizar la limpieza, prueba y compilación de la librería.
 
 ## 📚 Estructura de Módulos
 
-- **/app**: Una aplicación de ejemplo que consume el SDK y demuestra cómo construir una UI para visualizar los datos provistos.
 - **/observability-sdk**: El corazón de la librería, dividido en:
   - **:presentation**: Expone la API pública del SDK (`ContractObservabilityApi`) y contiene la lógica del ViewModel.
   - **:domain**: Contiene la lógica de negocio pura, las interfaces de los repositorios y los `UseCases`.
@@ -30,9 +29,9 @@ El proyecto está configurado con tareas personalizadas de Gradle para optimizar
 
 La tarea principal de integración continua es `buildDevAars`. Esta se encarga de ejecutar las pruebas unitarias y, si tienen éxito, ensamblar los artefactos `.aar` para cada módulo de la librería.
 
-#### Productos Generados
+#### Artefactos Generados
 
-Al ejecutar esta tarea, se generarán tres artefactos, uno por cada módulo del SDK, en las siguientes rutas:
+Al ejecutar esta tarea, se generarán tres artefactos tipo .aar, uno por cada módulo del SDK, en las siguientes rutas:
 
 - **Data**: `:observability-sdk/data/build/outputs/aar/data-dev.aar`
 - **Domain**: `:observability-sdk/domain/build/outputs/aar/domain-dev.aar`
