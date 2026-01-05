@@ -185,3 +185,12 @@ Si se dispusiera de más tiempo, las siguientes mejoras podrían llevar el SDK a
 - **Mejora de la Experiencia de Desarrollo (DX)**: Crear un módulo `/app` que sirva como un entorno de pruebas y ejecución de los modulos data, domain, presentation en tiempo real. Esto elimina la necesidad de compilar artefactos (`.aar`), copiarlos y pegarlos en un proyecto secundario, reduciendo drásticamente los tiempos de sincronización y compilación para el desarrollador que mantiene el SDK.
 
 - **Sistema de Versionamiento y Despliegue con JFrog**: Implementar un sistema de versionamiento y despliegue automatizado en un repositorio de artefactos como **JFrog Artifactory**. Esto eliminaría el proceso manual de compilar `.aar`s locales. La integración en la aplicación de pruebas (o en cualquier app cliente) se reduciría a simplemente cambiar el número de versión de la dependencia en Gradle.
+
+
+## 📝 Post Mortem: Reflexiones del Desarrollo
+
+Uno de los principales desafíos del proyecto fue diseñar una arquitectura escalable partiendo de unos requerimientos funcionales que, a primera vista, parecían sencillos. Aunque la prueba técnica no exigía explícitamente un backend, un consumo de servicios o una estructura modular, se tomó la decisión estratégica de dedicar tiempo a la planeación y análisis para ir más allá del alcance inicial.
+
+El objetivo fue construir una solución robusta que no solo cumpliera con los requisitos, sino que también demostrara la capacidad de desarrollar aplicaciones modulares y escalables, integrando conocimientos tanto de desarrollo móvil como de backend para lograr un ecosistema completo y dinámico con un enfoque de desarrollo end-to-end.
+
+El acierto más significativo fue la adopción de los principios de Arquitectura Limpia, separando el proyecto en las capas `data`, `domain` y `presentation`. Esta inversión inicial en una base desacoplada demostró su valor a lo largo del desarrollo, permitiendo implementar cambios y nuevas funcionalidades de manera ágil y segura, sin generar efectos secundarios en otras partes del sistema. Esto reafirma que una arquitectura bien planificada es el pilar fundamental para la mantenibilidad y evolución de cualquier software.
