@@ -29,17 +29,41 @@ El proyecto está configurado con tareas personalizadas de Gradle para optimizar
 
 La configuración de compilación está centralizada en `build-logic/src/main/kotlin/AndroidLibraryConventionPlugin.kt`. Se han definido tres variantes (build types) para el SDK:
 
-- **`dev`**: Para desarrollo local. Apunta a un servidor local (`http://192.168.1.3:8080/`) y tiene los logs activados.
-- **`qa`**: Para el entorno de Quality Assurance. Apunta al servidor de QA (`https://qa.meli.com/`) y también tiene los logs activados.
-- **`release`**: La versión de producción. Apunta a la URL de producción (`https://meli.com/`) y tiene los logs desactivados.
+- **`dev`**: Para desarrollo local.
+- **`qa`**: Para el entorno de Quality Assurance.
+- **`release`**: La versión de producción.
+
+#### Configuración para el Entorno de Desarrollo (`dev`)
+
+Para que la aplicación cliente se pueda comunicar con el servidor backend durante el desarrollo, ambos dispositivos (donde corre el backend y donde corre la app Android) deben estar conectados a la **misma red Wi-Fi**.
+
+La `BASE_URL` para la variante `dev` apunta a una dirección IP local que debe ser configurada manualmente.
+
+**¿Cómo encontrar y configurar la IP local?**
+
+1.  **Obtén la dirección IP de la máquina donde corre el backend**:
+    -   En **Windows**: Abre `cmd` y ejecuta el comando `ipconfig`. Busca la dirección `IPv4` de tu adaptador de Wi-Fi.
+    -   En **macOS**: Abre la `Terminal` y ejecuta el comando `ifconfig | grep "inet "`. Busca la dirección IP que usualmente empieza con `192.168.x.x`.
+
+2.  **Actualiza el archivo de configuración**:
+    -   Navega a `observability-sdk/build-logic/src/main/kotlin/AndroidLibraryConventionPlugin.kt`.
+    -   Busca la variante `dev` y reemplaza la IP `192.168.1.3` por la dirección IP que obtuviste en el paso anterior.
+
+    ```kotlin
+    create("dev") {
+        initWith(getByName("debug"))
+        buildConfigField("String", "BASE_URL", "\"http://TU_IP_LOCAL:8080/\"")
+        // ...
+    }
+    ```
+
+#### Variables de Entorno
 
 Cada variante configura los siguientes parámetros en el `BuildConfig` del módulo de `data`:
 
 - `BASE_URL`: La URL del servidor backend.
 - `LOGS_ENABLED`: Un booleano para activar o desactivar los logs.
-- `X_API_KEY`: La clave de API para autenticarse con el backend.
-
-**Importante**: La `X_API_KEY` se puede sobreescribir estableciendo una variable de entorno `X_API_KEY` en la máquina donde se realiza la compilación. Si la variable de entorno no está presente, se usará una clave por defecto específica para cada variante.
+- `X_API_KEY`: La clave de API para autenticarse. Esta clave se puede sobreescribir estableciendo una variable de entorno `X_API_KEY` en la máquina de compilación.
 
 ### Tarea `buildDevAars`
 
@@ -72,8 +96,6 @@ También puedes ejecutar estas tareas directamente desde el IDE:
 3.  Aquí encontrarás las tareas `buildDevAars` y `cleanBuilds`. Haz doble clic en cualquiera de ellas para ejecutarla.
 
 ## 🛠️ Cómo Usar el SDK
-
-La integración del SDK en una aplicación cliente se realiza a través de Koin y la API pública `ContractObservabilityApi`.
 
 ### 1. Inyección de Módulos Koin
 
