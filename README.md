@@ -19,11 +19,27 @@ Este proyecto es un SDK de observabilidad para Android, diseñado con una arquit
   - **:presentation**: Expone la API pública del SDK (`ContractObservabilityApi`) y contiene la lógica del ViewModel.
   - **:domain**: Contiene la lógica de negocio pura, las interfaces de los repositorios y los `UseCases`.
   - **:data**: Implementa los repositorios, manejando las fuentes de datos (Room y Ktor).
-- **/build-logic**: Centraliza la lógica de compilación de Gradle.
+- **/build-logic**: Centraliza la lógica de compilación de Gradle, incluyendo la definición de las variantes de compilación.
 
 ## 🚀 Build y Automatización con Gradle
 
 El proyecto está configurado con tareas personalizadas de Gradle para optimizar el flujo de desarrollo y asegurar la calidad del código.
+
+### Build Variants y Configuración de Entorno
+
+La configuración de compilación está centralizada en `build-logic/src/main/kotlin/AndroidLibraryConventionPlugin.kt`. Se han definido tres variantes (build types) para el SDK:
+
+- **`dev`**: Para desarrollo local. Apunta a un servidor local (`http://192.168.1.3:8080/`) y tiene los logs activados.
+- **`qa`**: Para el entorno de Quality Assurance. Apunta al servidor de QA (`https://qa.meli.com/`) y también tiene los logs activados.
+- **`release`**: La versión de producción. Apunta a la URL de producción (`https://meli.com/`) y tiene los logs desactivados.
+
+Cada variante configura los siguientes parámetros en el `BuildConfig` del módulo de `data`:
+
+- `BASE_URL`: La URL del servidor backend.
+- `LOGS_ENABLED`: Un booleano para activar o desactivar los logs.
+- `X_API_KEY`: La clave de API para autenticarse con el backend.
+
+**Importante**: La `X_API_KEY` se puede sobreescribir estableciendo una variable de entorno `X_API_KEY` en la máquina donde se realiza la compilación. Si la variable de entorno no está presente, se usará una clave por defecto específica para cada variante.
 
 ### Tarea `buildDevAars`
 
@@ -61,7 +77,7 @@ La integración del SDK en una aplicación cliente se realiza a través de Koin 
 
 ### 1. Inyección de Módulos Koin
 
-Cada módulo del SDK (`data`, `domain`, `presentation`) expone su propio módulo de Koin. La aplicación cliente es responsable de iniciar Koin y cargar estos módulos. Esto se hace en una clase `Application` personalizada.
+Cada módulo del SDK (`data`, `domain`, `presentation`) expone su propio módulo de Koin. La aplicación cliente es responsable de iniciar Koin y cargar los módulos del SDK (`dataModule`, `domainModule`, `presentationModule`).
 
 **Paso 1: Crear la clase `Application`**
 
@@ -124,4 +140,4 @@ Una vez que Koin está configurado, la UI de la aplicación cliente puede solici
 - **Base de Datos**: Room
 - **Red**: Ktor
 - **Pruebas**: JUnit 4, MockK
-- **Automatización**: Gradle, Script de Lotes de Windows (.bat)
+- **Automatización y Compilación**: Gradle
