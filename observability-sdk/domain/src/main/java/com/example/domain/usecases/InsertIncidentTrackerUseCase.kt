@@ -5,7 +5,7 @@ import com.example.domain.repositories.IncidentTrackerRepository
 
 class InsertIncidentTrackerUseCase(private val incidentTrackerRepository: IncidentTrackerRepository) {
 
-    suspend operator fun invoke(incidentTracker: IncidentTracker) {
-        incidentTrackerRepository.insertIncidentTracker(incidentTracker)
+    suspend operator fun invoke(incidentTracker: IncidentTracker, screenName: String) {
+        incidentTrackerRepository.insertIncidentTracker(incidentTracker, screenName)
     }
 }

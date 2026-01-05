@@ -37,7 +37,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     }
                     create("dev") {
                         initWith(getByName("debug"))
-                        buildConfigField("String", "BASE_URL", "\"http://localhost:8080/\"")
+                        buildConfigField("String", "BASE_URL", "\"http://192.168.1.3:8080/\"")
                         buildConfigField("boolean", "LOGS_ENABLED", "true")
                         buildConfigField("String", "X_API_KEY", "\"${apiKey ?: "ec1cbf5b-a671-42ce-a3c5-0bdba6d44f21"}\"")
                     }

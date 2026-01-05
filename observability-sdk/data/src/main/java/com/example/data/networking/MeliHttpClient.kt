@@ -12,13 +12,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class Screen(
-  val id: String,
-  val name: String
-)
 suspend inline fun <reified Body, reified HttpResponse: Any> HttpClient.doPost(
   route: String,
   body: Body? = null,
@@ -65,26 +59,32 @@ suspend inline fun <reified T> responseToResult(
       Result.success(response.body<T>())
     } catch(e : NoTransformationFoundException) {
       logger.critical("MeliHttClient::responseToResult::Fail -> $path", e.message, e)
+      logger.error("${response.status.value} - ${response.status.description}")
       Result.failure(Failure(DataError.Remote.SERIALIZATION, e.message))
     } catch(e : Exception) {
       logger.critical("MeliHttClient::responseToResult::Fail -> $path", e.message ?: "Error desconocido", e)
+      logger.error("${response.status.value} - ${response.status.description}")
       Result.failure(Failure(DataError.Remote.UNKNOWN, e.message ?: "Error desconocido"))
     }
 
     in 300..399 -> {
       logger.error("MeliHttClient::responseToResult::Fail::300..399 -> $path")
+      logger.error("${response.status.value} - ${response.status.description}")
       Result.failure(Exception(DataError.Remote.REDIRECTION.name))
     }
     in 400..499 -> {
       logger.error("MeliHttClient::responseToResult::Fail::400..499 -> $path")
+      logger.error("${response.status.value} - ${response.status.description}")
       Result.failure(Exception(DataError.Remote.CLIENT_ERROR.name))
     }
     in 500..599 -> {
       logger.critical("MeliHttpClient::responseToResult::Fail::500..599", "Error del servidor")
+      logger.error("${response.status.value} - ${response.status.description}")
       Result.failure(Exception(DataError.Remote.SERVER_ERROR.name))
     }
     else -> {
       logger.error("MeliHttClient::responseToResult::Fail -> $path")
+      logger.error("${response.status.value} - ${response.status.description}")
       Result.failure(Exception(DataError.Connection.NOT_CONNECTED.name))
     }
   }
