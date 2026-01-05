@@ -77,6 +77,8 @@ Al ejecutar esta tarea, se generarán tres artefactos tipo .aar, uno por cada m�
 - **Domain**: `:observability-sdk/domain/build/outputs/aar/domain-dev.aar`
 - **Presentation**: `:observability-sdk:presentation/build/outputs/aar/presentation-dev.aar`
 
+> **Nota**: Para mayor comodidad, se incluyen versiones pre-compiladas de estos artefactos en la carpeta [artifacts](./artifacts) del repositorio. Estos pueden ser utilizados directamente en un proyecto sin necesidad de compilar la librería.
+
 ### Cómo Ejecutar las Tareas
 
 #### 1. Desde la Línea de Comandos (Recomendado)
