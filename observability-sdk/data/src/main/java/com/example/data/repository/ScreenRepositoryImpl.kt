@@ -2,11 +2,13 @@
 
 package com.example.data.repository
 
+import android.util.Log
 import androidx.room.Transaction
 import com.example.data.database.daos.IncidentDao
 import com.example.data.database.daos.MetadataDao
 import com.example.data.database.daos.ScreenDao
 import com.example.data.database.entities.ScreenEntity
+import com.example.data.dtos.toEntity
 import com.example.data.dtos.toIncidentTracker
 import com.example.data.dtos.toMetadata
 import com.example.data.dtos.toScreen
@@ -17,6 +19,7 @@ import com.example.domain.models.Screen
 import com.example.domain.models.TimeFilter
 import com.example.domain.repositories.ScreenRepository
 import com.example.domain.util.EIncidentSeverity
+import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -116,6 +119,26 @@ class ScreenRepositoryImpl(
       }
       screensNotPushEntity.forEach { screen ->
         screenDao.upsert(screen.copy(isSync = true))
+      }
+    }
+  }
+
+  override suspend fun rollbackFromRemote() {
+    api.rollbackFromRemote<HttpResponse>().onSuccess { response ->
+      try {
+        Log.d("rollbackFromRemote", response.body<List<Screen>>().toString())
+        val screens = response.body<List<Screen>>()
+        screens.forEach { screen ->
+          screenDao.create(screen.toEntity())
+          screen.incidentTrackers.forEach { incident ->
+            incidentDao.create(incident.toEntity().copy (isSync = true))
+            incident.metadata.forEach { metadata ->
+              metadataDao.create(metadata.toEntity(incident.id).copy(isSync = true))
+            }
+          }
+        }
+      } catch(e: Exception) {
+        Log.d("rollbackFromRemote", e.message.toString())
       }
     }
   }

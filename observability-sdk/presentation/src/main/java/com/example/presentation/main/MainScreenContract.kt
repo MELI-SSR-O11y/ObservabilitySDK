@@ -30,6 +30,7 @@ data class MainState(
 sealed class MainActions {
     data class InsertScreen(val name : String): MainActions()
     data class InsertIncident(val incident : IncidentTracker, val screenName : String): MainActions()
+    object RollbackFromRemote: MainActions()
     data class FilterByScreen(val screenId : String?): MainActions()
     data class FilterBySeverity(val severity : EIncidentSeverity?): MainActions()
     data class FilterByTime(val timeFilter : TimeFilter): MainActions()

@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class Screen(
   val id: String,
   val name: String,
-  val isSync: Boolean,
-  val incidentTrackers: List<IncidentTracker>
+  val isSync: Boolean = false,
+  val incidentTrackers: List<IncidentTracker> = listOf()
 )

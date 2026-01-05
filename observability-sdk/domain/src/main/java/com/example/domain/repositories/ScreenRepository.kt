@@ -9,4 +9,5 @@ interface ScreenRepository {
   fun getAllScreens(): Flow<List<Screen>>
   fun getScreensByFilter(filter: IncidentFilter) : Flow<List<Screen>>
   suspend fun syncToRemote()
+  suspend fun rollbackFromRemote()
 }

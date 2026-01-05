@@ -31,7 +31,7 @@ class ObservabilityService(
     )
   }
 
-  override suspend fun <HttpResponse> getAllScreens() : Result<HttpResponse> {
+  override suspend fun <HttpResponse> rollbackFromRemote() : Result<HttpResponse> {
     logger.debug("ObservabilityService::getAllScreens")
     return httpClient.doGet(
       route = "api/observability/getAllScreens",

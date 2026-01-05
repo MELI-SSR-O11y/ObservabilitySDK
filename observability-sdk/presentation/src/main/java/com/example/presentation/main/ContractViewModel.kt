@@ -7,10 +7,10 @@ import com.example.domain.usecases.FilterDataUseCase
 import com.example.domain.usecases.GetAllScreensUseCase
 import com.example.domain.usecases.InsertIncidentTrackerUseCase
 import com.example.domain.usecases.InsertScreenUseCase
+import com.example.domain.usecases.RollbackFromRemoteUseCase
 import com.example.domain.usecases.SyncToRemoteUseCase
 import com.example.domain.util.EIncidentSeverity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +28,7 @@ class ContractViewModel(
     private val syncToRemoteUseCase: SyncToRemoteUseCase,
     private val getAllScreensUseCase: GetAllScreensUseCase,
     private val filterUseCase: FilterDataUseCase,
+    private val rollbackUseCase: RollbackFromRemoteUseCase
 ) : ViewModel(), ContractObservabilityApi {
 
     private val _internalState = MutableStateFlow(MainState())
@@ -74,6 +75,7 @@ class ContractViewModel(
             is MainActions.FilterByScreen -> _filter.update { it.copy(screenId = event.screenId) }
             is MainActions.FilterBySeverity -> _filter.update { it.copy(severity = event.severity) }
             is MainActions.FilterByTime -> _filter.update { it.copy(timeFilter = event.timeFilter) }
+            is MainActions.RollbackFromRemote -> viewModelScope.launch { rollbackUseCase() }
         }
     }
 
